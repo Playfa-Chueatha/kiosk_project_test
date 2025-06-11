@@ -101,7 +101,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => const MainScreen()));
+                                  },
                                   child: const Padding(
                                     padding: EdgeInsetsDirectional.all(20),
                                     child: Text(

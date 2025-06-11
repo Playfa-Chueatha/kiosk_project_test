@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:equatable/equatable.dart';
+import 'package:kiosk_project_test/data/Data_category.dart';
 
 abstract class FoodCategoryEvent extends Equatable {
   const FoodCategoryEvent();
@@ -22,7 +23,7 @@ abstract class FoodCategoryState extends Equatable {
 class FoodCategoryLoading extends FoodCategoryState {}
 
 class FoodCategoryLoaded extends FoodCategoryState {
-  final List<String> categories;
+  final List<FoodCategory> categories;
   const FoodCategoryLoaded(this.categories);
 
   @override
@@ -44,25 +45,25 @@ class FoodCategoryBloc extends Bloc<FoodCategoryEvent, FoodCategoryState> {
   }
 
   Future<void> _onLoadFoodCategories(
-      LoadFoodCategories event,
-      Emitter<FoodCategoryState> emit,
-      ) async {
-    try {
-      emit(FoodCategoryLoading());
+    LoadFoodCategories event,
+    Emitter<FoodCategoryState> emit,
+  ) async {
+  try {
+    emit(FoodCategoryLoading());
 
-      final String response =
-          await rootBundle.loadString('assets/data/data_test.json');
-      final Map<String, dynamic> decodedData = json.decode(response);
+    final String response = await rootBundle.loadString('assets/data/data_test.json');
+    final Map<String, dynamic> decodedData = json.decode(response);
 
-      final List<dynamic> foodCategoriesRaw = decodedData['result']['foodCategory'] as List;
+    final List<dynamic> foodCategoriesRaw = decodedData['result']['foodCategory'] as List<dynamic>;
 
-      final List<String> categories =
-          foodCategoriesRaw.map((item) => item['foodCatName'] as String).toList();
+    final List<FoodCategory> categories = foodCategoriesRaw
+        .map((json) => FoodCategory.fromJson(json as Map<String, dynamic>))
+        .toList();
 
-      emit(FoodCategoryLoaded(categories));
-    } catch (e) {
-      emit(
-          FoodCategoryError('Failed to load food categories: ${e.toString()}'));
-    }
+    emit(FoodCategoryLoaded(categories));
+  } catch (e) {
+    emit(FoodCategoryError('Failed to load food categories: ${e.toString()}'));
   }
+}
+
 }

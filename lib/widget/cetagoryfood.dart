@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
@@ -36,12 +37,12 @@ class _CategoryFoodState extends State<CategoryFood> {
           for (var category in state.categories) {
             final TextPainter textPainter = TextPainter(
               text: TextSpan(
-                text: category,
+                text: category.foodCatName,
                 style: TextStyle(fontSize: clampedFontSize),
               ),
               textDirection: TextDirection.ltr,
             )..layout(minWidth: 0, maxWidth: double.infinity);
-            maxTextWidth = maxTextWidth.clamp(textPainter.width, double.infinity);
+            maxTextWidth = max(maxTextWidth, textPainter.width);
           }
 
           const double buttonHorizontalPadding = 12.0 * 2;
@@ -69,11 +70,11 @@ class _CategoryFoodState extends State<CategoryFood> {
                     ),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('เลือก: $category')),
+                        SnackBar(content: Text('เลือก: ${category.foodCatName}')),
                       );
                     },
                     child: Text(
-                      category,
+                      category.foodCatName,
                       style: TextStyle(
                         fontSize: clampedFontSize,
                         color: const Color(0xFF673AB7),

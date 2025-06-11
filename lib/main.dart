@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kiosk_project_test/Screen/Home.dart';
 import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
+import 'package:kiosk_project_test/bloc/bloc_foodData.dart';
 import 'package:kiosk_project_test/bloc/bloc_nationalcetagoryfood.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -22,6 +24,10 @@ class MyApp extends StatelessWidget {
         BlocProvider<FoodCategoryBloc>(
           create: (context) => FoodCategoryBloc(),
         ),
+        BlocProvider<FoodListBloc>(
+          create: (context) => FoodListBloc()..add(LoadFoodLsit()),
+        ),
+
         
       ],
       child: MaterialApp(

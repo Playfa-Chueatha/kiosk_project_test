@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:kiosk_project_test/data/Data_food.dart';
+import 'package:kiosk_project_test/widget/Food.dart';
 import 'package:kiosk_project_test/widget/Nationnalfoodcetagory.dart';
 import 'package:kiosk_project_test/widget/cetagoryfood.dart';
 
 
 
 class LeftPanel extends StatelessWidget {
-  const LeftPanel({super.key});
+  final void Function(FoodData) onFoodSelected;
+  const LeftPanel({super.key, required this.onFoodSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +71,12 @@ class LeftPanel extends StatelessWidget {
             child: const Padding(
               padding: EdgeInsets.all(20),
               child: CategoryFood(),
+            ),
+          ),
+           Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: FoodListWidget(onFoodSelected: onFoodSelected,),
             ),
           )
         ],
