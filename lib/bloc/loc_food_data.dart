@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kiosk_project_test/data/Data_food.dart';
@@ -32,7 +33,6 @@ class FoodListBloc extends Bloc<FoodListEvent, FoodSetState> {
   ) async {
     try {
       emit(FoodSetLoading());
-      print("Loading food sets...");
 
       final String response =
           await rootBundle.loadString('assets/data/data_test.json');
@@ -42,7 +42,6 @@ class FoodListBloc extends Bloc<FoodListEvent, FoodSetState> {
       final List<FoodData> foodItems =
           foodRaw.map((item) => FoodData.fromJson(item)).toList();
 
-      print("Loaded ${foodItems.length} items.");
 
       emit(FoodItemLoaded(foodItems));
     } catch (e) {

@@ -1,39 +1,41 @@
+// ignore_for_file: file_names
+
 class FoodData {
-  final String foodId;              //รหัสสินค้า
-  final String foodName;            //ชื่อเมนู
-  final String foodNameAlt;         //ชื่อภาษาอื่น
-  final double foodPrice;           //ราคา
-  final String foodDesc;            //คำอธิบาย
-  final int foodSorting;            //
-  final bool active;                //สถานะการขาย
-  final String foodSetId;           //น่าจะไอดีอาหารประเทศไหน
-  final String foodCatId;           //ไอดีหมวดหมู่อาหาร
-  final String revenueClassId;      // 
-  final String taxRateId;           //
-  final String taxRate2Id;          //
-  final bool priority;              // ลำดับความสำคัญในการแสดงผล เช่น เมนูแนะนำหรือเปล่า?
-  final bool printSingle;           //
-  final bool isCommand;             //
-  final bool foodShowOption;        //
-  final String foodPDANumber;       //
-  final DateTime modifyOn;          //วันที่แก้ไขล่าสุด
-  final DateTime createOn;          //วันที่สร้างเมนู
-  final String pureImageName;       //
-  final String imageName;           //ลิงค์รูปภาพจากอินเทอร์เน็ต
-  final int qtyLimit;               //จำกัดการสั่ง
-  final bool isLimit;               //จำกัดการขาย
-  final String productId;           //Id ในฐานข้อมูล ทำไมมี 2 เลข?
-  final bool isOutStock;            //หมดสต็อก?
-  final bool isFree;                //ฟรี?
-  final bool isShow;                //แสดงให้ลูกค้าเห็นมั้ย
-  final bool isShowInstruction;     //
-  final String imageNameString;     //
-  final int thirdPartyGroupId;      //
-  final String foodBaseId;          //
-  final bool isThirdParty;          //ร้านอาหารภายนอกมั้ย มั้ง?
-  final String? plu;                //รหัสสินค้าสำหรับเครื่องคิดเงิน POS
-  final String imageThirdParty;     //
-  int quantity;
+  final String foodId;
+  final String foodName;
+  final String foodNameAlt;
+  final double foodPrice;
+  final String foodDesc;
+  final int foodSorting;
+  final bool active;
+  final String foodSetId;
+  final String foodCatId;
+  final String revenueClassId;
+  final String taxRateId;
+  final String taxRate2Id;
+  final bool priority;
+  final bool printSingle;
+  final bool isCommand;
+  final bool foodShowOption;
+  final String foodPDANumber;
+  final DateTime modifyOn;
+  final DateTime createOn;
+  final String pureImageName;
+  final String imageName;
+  final int qtyLimit;
+  final bool isLimit;
+  final String productId;
+  final bool isOutStock;
+  final bool isFree;
+  final bool isShow;
+  final bool isShowInstruction;
+  final String imageNameString;
+  final int thirdPartyGroupId;
+  final String foodBaseId;
+  final bool isThirdParty;
+  final String imageThirdParty;
+
+  int quantity; 
 
   FoodData({
     required this.foodId,
@@ -68,49 +70,130 @@ class FoodData {
     required this.thirdPartyGroupId,
     required this.foodBaseId,
     required this.isThirdParty,
-    this.plu,
     required this.imageThirdParty,
-    this.quantity = 1,
+    this.quantity = 0,
   });
 
-  factory FoodData.fromJson(Map<String, dynamic> json) {
+  
+  FoodData copyWith({
+    int? quantity,
+  }) {
     return FoodData(
-      foodId: json['foodId'] ?? '',
-      foodName: json['foodName'] ?? '',
-      foodNameAlt: json['foodNameAlt'] ?? '',
-      foodPrice: (json['foodPrice'] is int)
-          ? (json['foodPrice'] as int).toDouble()
-          : (json['foodPrice'] ?? 0.0),
-      foodDesc: json['foodDesc'] ?? '',
-      foodSorting: json['foodSorting'] ?? 0,
-      active: json['active'] ?? false,
-      foodSetId: json['foodSetId'] ?? '',
-      foodCatId: json['foodCatId'] ?? '',
-      revenueClassId: json['revenueClassId'] ?? '',
-      taxRateId: json['taxRateId'] ?? '',
-      taxRate2Id: json['taxRate2Id'] ?? '',
-      priority: json['priority'] ?? false,
-      printSingle: json['printSingle'] ?? false,
-      isCommand: json['isCommand'] ?? false,
-      foodShowOption: json['foodShowOption'] ?? false,
-      foodPDANumber: json['foodPDANumber'] ?? '',
-      modifyOn: DateTime.tryParse(json['modifyOn'] ?? '') ?? DateTime.now(),
-      createOn: DateTime.tryParse(json['createOn'] ?? '') ?? DateTime.now(),
-      pureImageName: json['pureImageName'] ?? '',
-      imageName: json['imageName'] ?? '',
-      qtyLimit: json['qtyLimit'] ?? 0,
-      isLimit: json['isLimit'] ?? false,
-      productId: json['productId'] ?? '',
-      isOutStock: json['isOutStock'] ?? false,
-      isFree: json['isFree'] ?? false,
-      isShow: json['isShow'] ?? false,
-      isShowInstruction: json['isShowInstruction'] ?? false,
-      imageNameString: json['imageNameString'] ?? '',
-      thirdPartyGroupId: json['thirdPartyGroupId'] ?? 0,
-      foodBaseId: json['foodBaseId'] ?? '',
-      isThirdParty: json['isThirdParty'] ?? false,
-      plu: json['plu'], 
-      imageThirdParty: json['imageThirdParty'] ?? '',
+      foodId: foodId,
+      foodName: foodName,
+      foodNameAlt: foodNameAlt,
+      foodPrice: foodPrice,
+      foodDesc: foodDesc,
+      foodSorting: foodSorting,
+      active: active,
+      foodSetId: foodSetId,
+      foodCatId: foodCatId,
+      revenueClassId: revenueClassId,
+      taxRateId: taxRateId,
+      taxRate2Id: taxRate2Id,
+      priority: priority,
+      printSingle: printSingle,
+      isCommand: isCommand,
+      foodShowOption: foodShowOption,
+      foodPDANumber: foodPDANumber,
+      modifyOn: modifyOn,
+      createOn: createOn,
+      pureImageName: pureImageName,
+      imageName: imageName,
+      qtyLimit: qtyLimit,
+      isLimit: isLimit,
+      productId: productId,
+      isOutStock: isOutStock,
+      isFree: isFree,
+      isShow: isShow,
+      isShowInstruction: isShowInstruction,
+      imageNameString: imageNameString,
+      thirdPartyGroupId: thirdPartyGroupId,
+      foodBaseId: foodBaseId,
+      isThirdParty: isThirdParty,
+      imageThirdParty: imageThirdParty,
+      quantity: quantity ?? this.quantity,
     );
+  }
+
+  
+  factory FoodData.fromJson(Map<String, dynamic> json) {
+  return FoodData(
+    foodId: json['foodId'] as String? ?? '',
+    foodName: json['foodName'] as String? ?? '',
+    foodNameAlt: json['foodNameAlt'] as String? ?? '',
+    foodPrice: (json['foodPrice'] as num?)?.toDouble() ?? 0.0,
+    foodDesc: json['foodDesc'] as String? ?? '',
+    foodSorting: json['foodSorting'] as int? ?? 0,
+    active: json['active'] as bool? ?? false,
+    foodSetId: json['foodSetId'] as String? ?? '',
+    foodCatId: json['foodCatId'] as String? ?? '',
+    revenueClassId: json['revenueClassId'] as String? ?? '',
+    taxRateId: json['taxRateId'] as String? ?? '',
+    taxRate2Id: json['taxRate2Id'] as String? ?? '',
+    priority: json['priority'] as bool? ?? false,
+    printSingle: json['printSingle'] as bool? ?? false,
+    isCommand: json['isCommand'] as bool? ?? false,
+    foodShowOption: json['foodShowOption'] as bool? ?? false,
+    foodPDANumber: json['foodPDANumber'] as String? ?? '',
+    modifyOn: json['modifyOn'] != null ? DateTime.parse(json['modifyOn']) : DateTime.now(),
+    createOn: json['createOn'] != null ? DateTime.parse(json['createOn']) : DateTime.now(),
+    pureImageName: json['pureImageName'] as String? ?? '',
+    imageName: json['imageName'] as String? ?? '',
+    qtyLimit: json['qtyLimit'] as int? ?? 0,
+    isLimit: json['isLimit'] as bool? ?? false,
+    productId: json['productId'] as String? ?? '',
+    isOutStock: json['isOutStock'] as bool? ?? false,
+    isFree: json['isFree'] as bool? ?? false,
+    isShow: json['isShow'] as bool? ?? false,
+    isShowInstruction: json['isShowInstruction'] as bool? ?? false,
+    imageNameString: json['imageNameString'] as String? ?? '',
+    thirdPartyGroupId: json['thirdPartyGroupId'] as int? ?? 0,
+    foodBaseId: json['foodBaseId'] as String? ?? '',
+    isThirdParty: json['isThirdParty'] as bool? ?? false,
+    imageThirdParty: json['imageThirdParty'] as String? ?? '',
+    quantity: json['quantity'] as int? ?? 0,
+  );
+}
+
+
+  
+  Map<String, dynamic> toJson() {
+    return {
+      'foodId': foodId,
+      'foodName': foodName,
+      'foodNameAlt': foodNameAlt,
+      'foodPrice': foodPrice,
+      'foodDesc': foodDesc,
+      'foodSorting': foodSorting,
+      'active': active,
+      'foodSetId': foodSetId,
+      'foodCatId': foodCatId,
+      'revenueClassId': revenueClassId,
+      'taxRateId': taxRateId,
+      'taxRate2Id': taxRate2Id,
+      'priority': priority,
+      'printSingle': printSingle,
+      'isCommand': isCommand,
+      'foodShowOption': foodShowOption,
+      'foodPDANumber': foodPDANumber,
+      'modifyOn': modifyOn.toIso8601String(),
+      'createOn': createOn.toIso8601String(),
+      'pureImageName': pureImageName,
+      'imageName': imageName,
+      'qtyLimit': qtyLimit,
+      'isLimit': isLimit,
+      'productId': productId,
+      'isOutStock': isOutStock,
+      'isFree': isFree,
+      'isShow': isShow,
+      'isShowInstruction': isShowInstruction,
+      'imageNameString': imageNameString,
+      'thirdPartyGroupId': thirdPartyGroupId,
+      'foodBaseId': foodBaseId,
+      'isThirdParty': isThirdParty,
+      'imageThirdParty': imageThirdParty,
+      'quantity': quantity,
+    };
   }
 }

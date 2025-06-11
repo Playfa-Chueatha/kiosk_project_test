@@ -1,16 +1,25 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
-import 'package:kiosk_project_test/bloc/bloc_foodData.dart';
+import 'package:kiosk_project_test/bloc/loc_food_data.dart';
 import 'package:kiosk_project_test/data/Data_food.dart';
 
 class FoodListWidget extends StatelessWidget {
   final Function(FoodData) onFoodSelected;
-  const FoodListWidget({super.key, required this.onFoodSelected});
+  final String searchText;
+  final String selectedFoodSetId;
+  const FoodListWidget({
+    super.key,
+    required this.onFoodSelected,
+    required this.searchText,
+    required this.selectedFoodSetId,
+  });
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-
     final scaleFactor = screenWidth / 600;
 
     return BlocBuilder<FoodCategoryBloc, FoodCategoryState>(
@@ -22,23 +31,28 @@ class FoodListWidget extends StatelessWidget {
 
           return BlocBuilder<FoodListBloc, FoodSetState>(
             builder: (context, state) {
-              if (state is FoodSetLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is FoodItemLoaded) {
-                final foodItem = state.foodItem;
+              if (state is FoodItemLoaded) {
+                final allFood = state.foodItem;
+
+                final filteredFood = allFood.where((food) {
+                  final matchSearch = searchText.isEmpty ||
+                      food.foodName.toLowerCase().contains(searchText);
+                  final matchSetId = selectedFoodSetId.isEmpty ||
+                      food.foodSetId == selectedFoodSetId;
+                  return matchSearch && matchSetId;
+                }).toList();
 
                 final Map<String, List<FoodData>> groupedFood = {};
-                for (var food in foodItem) {
+                for (var food in filteredFood) {
                   groupedFood.putIfAbsent(food.foodCatId, () => []).add(food);
                 }
 
                 return ListView(
                   padding: EdgeInsets.all(16 * scaleFactor),
                   children: groupedFood.entries.map((entry) {
-                    final catId = entry.key;
+                    final categoryName =
+                        categoryNameMap[entry.key] ?? 'Unknown';
                     final items = entry.value;
-
-                    final categoryName = categoryNameMap[catId] ?? 'Unknown';
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -48,117 +62,84 @@ class FoodListWidget extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 20 * scaleFactor,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87,
                           ),
                         ),
-                        SizedBox(height: 8 * scaleFactor),
+                        const SizedBox(height: 8),
                         GridView.builder(
                           physics: const NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           itemCount: items.length,
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            crossAxisSpacing: 5 * scaleFactor,
-                            mainAxisSpacing: 5 * scaleFactor,
+                            crossAxisCount: screenWidth < 600 ? 2 : 4,
+                            crossAxisSpacing: 5,
+                            mainAxisSpacing: 5,
                             childAspectRatio: 0.8,
                           ),
                           itemBuilder: (context, index) {
                             final food = items[index];
                             return Card(
-                                color: Colors.white,
-                                elevation: 4,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(12 * scaleFactor),
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              clipBehavior: Clip.antiAlias,
+                              child: InkWell(
+                                onTap: () => onFoodSelected(food),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      flex: 5,
+                                      child: Image.network(
+                                        food.imageName,
+                                        fit: BoxFit.cover,
+                                        width: double.infinity,
+                                        errorBuilder:
+                                            (context, error, stackTrace) =>
+                                                const Icon(Icons.broken_image),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 4,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              food.foodName,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              food.foodDesc,
+                                              style: const TextStyle(
+                                                  color: Colors.grey),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const Spacer(),
+                                            Text(
+                                              '\$${food.foodPrice}',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                clipBehavior: Clip.antiAlias,
-                                child: InkWell(
-                                  onTap: () => onFoodSelected(food),
-                                  child: LayoutBuilder(
-                                    builder: (context, constraints) {
-                                      final double maxWidth =
-                                          constraints.maxWidth;
-
-                                      final double titleFontSize =
-                                          (maxWidth * 0.12).clamp(12, 18);
-                                      final double descFontSize =
-                                          (maxWidth * 0.10).clamp(10, 14);
-                                      final double priceFontSize =
-                                          (maxWidth * 0.14).clamp(16, 22);
-                                      final double iconSize = maxWidth * 0.3;
-
-                                      return Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Expanded(
-                                            flex: 5,
-                                            child: SizedBox(
-                                              width: double.infinity,
-                                              child: Image.network(
-                                                food.imageName,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error,
-                                                        stackTrace) =>
-                                                    Icon(Icons.broken_image,
-                                                        size: iconSize),
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 4,
-                                            child: Padding(
-                                              padding: EdgeInsets.all(
-                                                  8.0 * scaleFactor),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    food.foodName,
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: titleFontSize,
-                                                      color: Colors.black,
-                                                    ),
-                                                    maxLines: 1,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                  SizedBox(
-                                                      height: 4 * scaleFactor),
-                                                  Text(
-                                                    food.foodDesc,
-                                                    style: TextStyle(
-                                                      fontSize: descFontSize,
-                                                      color: Colors.grey,
-                                                    ),
-                                                    maxLines: 2,
-                                                    overflow:
-                                                        TextOverflow.ellipsis,
-                                                  ),
-                                                  const Spacer(),
-                                                  Text(
-                                                    '\$${food.foodPrice} ',
-                                                    style: TextStyle(
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                      fontSize: priceFontSize,
-                                                      color: Colors.grey,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                )
-                              );
+                              ),
+                            );
                           },
                         ),
                         SizedBox(height: 24 * scaleFactor),
@@ -166,6 +147,8 @@ class FoodListWidget extends StatelessWidget {
                     );
                   }).toList(),
                 );
+              } else if (state is FoodSetLoading) {
+                return const Center(child: CircularProgressIndicator());
               } else if (state is FoodSetError) {
                 return Center(child: Text('เกิดข้อผิดพลาด: ${state.message}'));
               } else {

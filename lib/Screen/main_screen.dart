@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:kiosk_project_test/widget/left_panelMainhome.dart';
 import 'package:kiosk_project_test/data/Data_food.dart';
+import 'package:kiosk_project_test/widget/left_panelMainhome.dart';
 import 'package:kiosk_project_test/widget/right_panelMainhome.dart';
 
 class MainScreen extends StatefulWidget {
@@ -15,85 +15,56 @@ class _MainScreenState extends State<MainScreen> {
 
   void handleFoodSelected(FoodData food) {
     setState(() {
-      final existing = selectedFoods.firstWhere(
-        (f) => f.foodId == food.foodId,
-        orElse: () => FoodData(
-          // ใส่ข้อมูลเปล่า เพราะต้อง return บางอย่าง
-          foodId: '',
-          foodName: '',
-          foodNameAlt: '',
-          foodPrice: 0,
-          foodDesc: '',
-          foodSorting: 0,
-          active: false,
-          foodSetId: '',
-          foodCatId: '',
-          revenueClassId: '',
-          taxRateId: '',
-          taxRate2Id: '',
-          priority: false,
-          printSingle: false,
-          isCommand: false,
-          foodShowOption: false,
-          foodPDANumber: '',
-          modifyOn: DateTime.now(),
-          createOn: DateTime.now(),
-          pureImageName: '',
-          imageName: '',
-          qtyLimit: 0,
-          isLimit: false,
-          productId: '',
-          isOutStock: false,
-          isFree: false,
-          isShow: false,
-          isShowInstruction: false,
-          imageNameString: '',
-          thirdPartyGroupId: 0,
-          foodBaseId: '',
-          isThirdParty: false,
-          imageThirdParty: '',
-        ),
-      );
+      final existingIndex = selectedFoods.indexWhere((f) => f.foodId == food.foodId);
 
-      if (existing.foodId != '') {
-        existing.quantity += 1;
+      if (existingIndex != -1) {
+        
+        final existingFood = selectedFoods[existingIndex];
+        selectedFoods[existingIndex] = existingFood.copyWith(quantity: existingFood.quantity + 1);
       } else {
-        final newFood = food;
-        newFood.quantity = 1;
-        selectedFoods.add(newFood);
+        
+        selectedFoods.add(food.copyWith(quantity: 1));
       }
     });
   }
 
   void increaseQuantity(String foodId) {
     setState(() {
-      final food = selectedFoods.firstWhere((f) => f.foodId == foodId);
-      food.quantity++;
+      final index = selectedFoods.indexWhere((f) => f.foodId == foodId);
+      if (index != -1) {
+        final food = selectedFoods[index];
+        selectedFoods[index] = food.copyWith(quantity: food.quantity + 1);
+      }
     });
   }
 
   void decreaseQuantity(String foodId) {
     setState(() {
-      final food = selectedFoods.firstWhere((f) => f.foodId == foodId);
-      if (food.quantity > 1) {
-        food.quantity--;
-      } else {
-        selectedFoods.removeWhere((f) => f.foodId == foodId);
+      final index = selectedFoods.indexWhere((f) => f.foodId == foodId);
+      if (index != -1) {
+        final food = selectedFoods[index];
+        if (food.quantity > 1) {
+          selectedFoods[index] = food.copyWith(quantity: food.quantity - 1);
+        } else {
+          selectedFoods.removeAt(index);
+        }
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+
     return Scaffold(
       body: Row(
         children: [
           Expanded(
-            flex: 8,
+            flex: isPortrait ? 6 : 8,
             child: LeftPanel(onFoodSelected: handleFoodSelected),
           ),
           Expanded(
-            flex: 2,
+            flex: isPortrait ? 4 : 2,
             child: RightPanel(
               selectedFoods: selectedFoods,
               onIncrease: increaseQuantity,

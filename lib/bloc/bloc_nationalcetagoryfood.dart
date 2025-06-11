@@ -1,7 +1,10 @@
+// Events
 import 'dart:convert';
-import 'package:bloc/bloc.dart';
-import 'package:flutter/services.dart' show rootBundle;
+
 import 'package:equatable/equatable.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kiosk_project_test/data/Data_FoodSet.dart';
 
 abstract class FoodSetEvent extends Equatable {
   const FoodSetEvent();
@@ -12,6 +15,7 @@ abstract class FoodSetEvent extends Equatable {
 
 class LoadFoodSets extends FoodSetEvent {}
 
+// States
 abstract class FoodSetState extends Equatable {
   const FoodSetState();
 
@@ -22,12 +26,12 @@ abstract class FoodSetState extends Equatable {
 class FoodSetLoading extends FoodSetState {}
 
 class FoodSetLoaded extends FoodSetState {
-  final List<String> categories;
+  final List<FoodSet> foodSets;
 
-  const FoodSetLoaded(this.categories);
+  const FoodSetLoaded(this.foodSets);
 
   @override
-  List<Object> get props => [categories];
+  List<Object> get props => [foodSets];
 }
 
 class FoodSetError extends FoodSetState {
@@ -39,6 +43,7 @@ class FoodSetError extends FoodSetState {
   List<Object> get props => [message];
 }
 
+// Bloc
 class FoodSetBloc extends Bloc<FoodSetEvent, FoodSetState> {
   FoodSetBloc() : super(FoodSetLoading()) {
     on<LoadFoodSets>(_onLoadFoodSets);
@@ -55,18 +60,15 @@ class FoodSetBloc extends Bloc<FoodSetEvent, FoodSetState> {
           await rootBundle.loadString('assets/data/data_test.json');
       final Map<String, dynamic> decodedData = json.decode(response);
 
-      
       final List<dynamic> foodSetRaw = decodedData['result']['foodSet'] as List;
 
-      
-      final List<String> categories =
-          foodSetRaw.map((item) => item['foodSetName'] as String).toList();
+      final List<FoodSet> foodSets =
+          foodSetRaw.map((item) => FoodSet.fromJson(item)).toList();
 
-      emit(FoodSetLoaded(categories));
+      emit(FoodSetLoaded(foodSets));
     } catch (e) {
       emit(
           FoodSetError('Failed to load food categories: ${e.toString()}'));
     }
   }
 }
-
