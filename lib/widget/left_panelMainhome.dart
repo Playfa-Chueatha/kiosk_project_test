@@ -10,6 +10,7 @@ import 'package:kiosk_project_test/widget/cetagoryfood.dart';
 
 class LeftPanel extends StatefulWidget {
   final void Function(FoodData) onFoodSelected;
+
   const LeftPanel({
     super.key,
     required this.onFoodSelected,
@@ -24,6 +25,7 @@ class _LeftPanelState extends State<LeftPanel> {
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
   String? _selectedFoodSetId;
+  String? _selectedFoodCatId;
 
   void _toggleSearch() {
     setState(() {
@@ -47,12 +49,15 @@ class _LeftPanelState extends State<LeftPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return Stack(
       children: [
         Container(
           color: Colors.white,
           child: Column(
             children: [
+              SizedBox(height: screenHeight * 0.0),
               Padding(
                 padding: const EdgeInsets.all(10),
                 child: Row(
@@ -93,7 +98,6 @@ class _LeftPanelState extends State<LeftPanel> {
                 padding: const EdgeInsets.all(20),
                 child: NationalFoodCategory(
                   onSelected: (selectedFoodSet) {
-                   
                     print('หมวด: ${selectedFoodSet.foodSetName}');
                     print('ID: ${selectedFoodSet.foodSetId}');
                     setState(() {
@@ -102,18 +106,28 @@ class _LeftPanelState extends State<LeftPanel> {
                   },
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.all(20),
-                child: CategoryFood(),
-              ),
+              if (_selectedFoodSetId != null)
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: CategoryFood(
+                    selectedFoodSetId: _selectedFoodSetId!,
+                    onCategorySelected: (foodCatId) {
+                      print('เลือกหมวดหมู่: $foodCatId');
+                      setState(() {
+                        _selectedFoodCatId = foodCatId;
+                      });
+                    },
+                  ),
+                ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(10),
                   child: FoodListWidget(
-                    key: ValueKey(_searchText),
+                    key: ValueKey(_searchText + (_selectedFoodSetId ?? '')),
                     onFoodSelected: widget.onFoodSelected,
                     searchText: _searchText,
                     selectedFoodSetId: _selectedFoodSetId ?? '',
+                    selectedFoodCatId: _selectedFoodCatId,
                   ),
                 ),
               ),

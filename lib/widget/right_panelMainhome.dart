@@ -18,6 +18,7 @@ class RightPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double total = selectedFoods.fold(0, (sum, item) => sum + (item.foodPrice * item.quantity));
+    final double screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
       decoration: BoxDecoration(
@@ -33,6 +34,7 @@ class RightPanel extends StatelessWidget {
       ),
       child: Column(
         children: [
+          SizedBox(height: screenHeight * 0.03),
           Padding(
             padding: const EdgeInsets.all(16),
             child: Row(

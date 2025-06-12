@@ -29,83 +29,107 @@ class _MyHomePageState extends State<MyHomePage> {
     final isPortrait = orientation == Orientation.portrait;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFBFBFB),
       appBar: const MyCustomAppBar(title: 'Soi Siam'),
       body: isPortrait
-          ? Column(
+          ? Stack(
               children: [
-                Expanded(
-                  flex: 1,
-                  child: Container(
-                    width: size.width,
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/images/BG01.png'),
-                        fit: BoxFit.cover,
+                
+                Positioned.fill(
+                  child: Column(
+                    children: [
+                      const Expanded(
+                          flex: 1, child: SizedBox()), 
+                      Expanded(
+                        flex: 1,
+                        child: Image.asset(
+                          'assets/images/ani_welcome_3.gif',
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
                       ),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          AutoSizeText(
-                            'Self-Service',
-                            style: mainTextStyle(48),
-                            maxLines: 1,
-                            minFontSize: 20,
+                    ],
+                  ),
+                ),
+
+                
+                Column(
+                  children: [
+                    Expanded(
+                      flex: 1,
+                      child: Container(
+                        width: double.infinity,
+                        decoration: const BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/images/BG02.png'),
+                            fit: BoxFit.cover,
                           ),
-                          AutoSizeText(
-                            'Experience.',
-                            style: mainTextStyle(48),
-                            maxLines: 1,
-                            minFontSize: 20,
-                          ),
-                          const SizedBox(height: 10),
-                          const AutoSizeText(
-                            'From self-order to self-checkout',
-                            style: TextStyle(
-                                color: Colors.grey,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20),
-                            maxLines: 1,
-                            minFontSize: 14,
-                          ),
-                          const SizedBox(height: 10),
-                          const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Center(
+                          child: Column(
                             mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Icon(Icons.credit_card,
-                                  color: Color(0xFFEB5757), size: 24),
-                              SizedBox(width: 10),
                               AutoSizeText(
-                                'Accept Credit Card Only',
+                                'Self-Service',
+                                style: mainTextStyle(48),
+                                maxLines: 1,
+                                minFontSize: 20,
+                              ),
+                              AutoSizeText(
+                                'Experience.',
+                                style: mainTextStyle(48),
+                                maxLines: 1,
+                                minFontSize: 20,
+                              ),
+                              const SizedBox(height: 10),
+                              const AutoSizeText(
+                                'From self-order to self-checkout',
                                 style: TextStyle(
-                                    color: Color(0xFFEB5757),
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold),
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
                                 maxLines: 1,
                                 minFontSize: 14,
                               ),
-                            ],
-                          ),
-                          Padding(
-                              padding: const EdgeInsetsDirectional.all(10),
-                              child: OutlinedButton(
+                              const SizedBox(height: 10),
+                              const Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.credit_card,
+                                      color: Color(0xFFEB5757), size: 24),
+                                  SizedBox(width: 10),
+                                  AutoSizeText(
+                                    'Accept Credit Card Only',
+                                    style: TextStyle(
+                                      color: Color(0xFFEB5757),
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    maxLines: 1,
+                                    minFontSize: 14,
+                                  ),
+                                ],
+                              ),
+                              Padding(
+                                padding: const EdgeInsetsDirectional.all(10),
+                                child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
-                                    backgroundColor: const Color(0xFF496EE2),
+                                    backgroundColor: Color(0xFF496EE2),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
                                   onPressed: () {
                                     Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => const MainScreen()));
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const MainScreen()),
+                                    );
                                   },
                                   child: const Padding(
                                     padding: EdgeInsetsDirectional.all(20),
@@ -115,21 +139,16 @@ class _MyHomePageState extends State<MyHomePage> {
                                         color: Colors.white,
                                       ),
                                     ),
-                                  )))
-                        ],
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: SizedBox(
-                    width: size.width,
-                    child: Image.asset(
-                      'assets/images/ani_welcome_3.gif',
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+                    const Expanded(flex: 1, child: SizedBox()),
+                  ],
                 ),
               ],
             )
@@ -201,7 +220,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => const MainScreen()));
+                                        builder: (context) =>
+                                            const MainScreen()));
                               },
                               child: const Padding(
                                 padding: EdgeInsetsDirectional.all(20),

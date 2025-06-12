@@ -1,4 +1,4 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,16 +6,64 @@ import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
 import 'package:kiosk_project_test/bloc/loc_food_data.dart';
 import 'package:kiosk_project_test/data/Data_food.dart';
 
-class FoodListWidget extends StatelessWidget {
+class FoodListWidget extends StatefulWidget {
   final Function(FoodData) onFoodSelected;
   final String searchText;
   final String selectedFoodSetId;
+  final String? selectedFoodCatId;
+
   const FoodListWidget({
     super.key,
     required this.onFoodSelected,
     required this.searchText,
     required this.selectedFoodSetId,
+    required this.selectedFoodCatId,
   });
+
+  @override
+  State<FoodListWidget> createState() => _FoodListWidgetState();
+}
+
+class _FoodListWidgetState extends State<FoodListWidget> {
+  final ScrollController _scrollController = ScrollController();
+
+  final Map<String, GlobalKey> _categoryKeys = {};
+
+  List<String> _currentCategoryIds = [];
+
+  @override
+  void didUpdateWidget(FoodListWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.searchText != oldWidget.searchText ||
+        widget.selectedFoodSetId != oldWidget.selectedFoodSetId) {
+      _categoryKeys.clear();
+    }
+
+    if (widget.selectedFoodCatId != null &&
+        widget.selectedFoodCatId != oldWidget.selectedFoodCatId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 200), () {
+          _scrollToCategory(widget.selectedFoodCatId!);
+        });
+      });
+    }
+  }
+
+  void _scrollToCategory(String categoryId) {
+    final keyContext = _categoryKeys[categoryId]?.currentContext;
+    if (keyContext != null) {
+      print('Scrolling to category: $categoryId');
+      Scrollable.ensureVisible(
+        keyContext,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    } else {
+      print('Category $categoryId not found in _categoryKeys');
+      print('Available keys: ${_categoryKeys.keys.toList()}');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,27 +82,55 @@ class FoodListWidget extends StatelessWidget {
               if (state is FoodItemLoaded) {
                 final allFood = state.foodItem;
 
+                
                 final filteredFood = allFood.where((food) {
-                  final matchSearch = searchText.isEmpty ||
-                      food.foodName.toLowerCase().contains(searchText);
-                  final matchSetId = selectedFoodSetId.isEmpty ||
-                      food.foodSetId == selectedFoodSetId;
-                  return matchSearch && matchSetId;
+                  final matchSearch = widget.searchText.isEmpty ||
+                      food.foodName
+                          .toLowerCase()
+                          .contains(widget.searchText.toLowerCase());
+                  final matchSetId = widget.selectedFoodSetId.isEmpty ||
+                      food.foodSetId == widget.selectedFoodSetId;
+
+                  
+                  final matchCatId = widget.selectedFoodCatId == null ||
+                      food.foodCatId == widget.selectedFoodCatId;
+
+                  return matchSearch && matchSetId && matchCatId;
                 }).toList();
 
+                
                 final Map<String, List<FoodData>> groupedFood = {};
                 for (var food in filteredFood) {
                   groupedFood.putIfAbsent(food.foodCatId, () => []).add(food);
                 }
 
+                
+                final sortedEntries = groupedFood.entries.toList()
+                  ..sort((a, b) {
+                    final nameA = categoryNameMap[a.key] ?? '';
+                    final nameB = categoryNameMap[b.key] ?? '';
+                    return nameA.compareTo(nameB);
+                  });
+
+                
+                _currentCategoryIds = sortedEntries.map((e) => e.key).toList();
+
+                
+                for (var catId in _currentCategoryIds) {
+                  _categoryKeys.putIfAbsent(catId, () => GlobalKey());
+                }
+
                 return ListView(
+                  controller: _scrollController,
                   padding: EdgeInsets.all(16 * scaleFactor),
-                  children: groupedFood.entries.map((entry) {
-                    final categoryName =
-                        categoryNameMap[entry.key] ?? 'Unknown';
+                  children: sortedEntries.map((entry) {
+                    final categoryId = entry.key;
+                    final categoryName = categoryNameMap[categoryId] ?? 'Unknown';
                     final items = entry.value;
+                    final key = _categoryKeys[categoryId]!;
 
                     return Column(
+                      key: key,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -69,9 +145,23 @@ class FoodListWidget extends StatelessWidget {
                           physics: const NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           itemCount: items.length,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: screenWidth < 600 ? 2 : 4,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: () {
+                              final orientation =
+                                  MediaQuery.of(context).orientation;
+                              final isTabletPortrait = screenWidth >= 600 &&
+                                  orientation == Orientation.portrait;
+
+                              if (isTabletPortrait) {
+                                return 2;
+                              } else if (screenWidth >= 1000) {
+                                return 4;
+                              } else if (screenWidth >= 600) {
+                                return 3;
+                              } else {
+                                return 2;
+                              }
+                            }(),
                             crossAxisSpacing: 5,
                             mainAxisSpacing: 5,
                             childAspectRatio: 0.8,
@@ -85,7 +175,7 @@ class FoodListWidget extends StatelessWidget {
                               ),
                               clipBehavior: Clip.antiAlias,
                               child: InkWell(
-                                onTap: () => onFoodSelected(food),
+                                onTap: () => widget.onFoodSelected(food),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -95,9 +185,8 @@ class FoodListWidget extends StatelessWidget {
                                         food.imageName,
                                         fit: BoxFit.cover,
                                         width: double.infinity,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                const Icon(Icons.broken_image),
+                                        errorBuilder: (context, error, stackTrace) =>
+                                            const Icon(Icons.broken_image),
                                       ),
                                     ),
                                     Expanded(

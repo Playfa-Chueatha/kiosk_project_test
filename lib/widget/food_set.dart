@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kiosk_project_test/bloc/bloc_nationalcetagoryfood.dart';
 import 'package:kiosk_project_test/data/Data_FoodSet.dart';
 
-
-
 class NationalFoodCategory extends StatefulWidget {
   final void Function(FoodSet selectedFoodSet) onSelected;
 
@@ -47,8 +45,12 @@ class _NationalFoodCategoryState extends State<NationalFoodCategory> {
           final double screenHeight = MediaQuery.of(context).size.height;
           final double screenWidth = MediaQuery.of(context).size.width;
 
-          final double listViewAvailableHeight = (screenHeight * 0.15) - (20 * 2);
-          final double targetButtonHeight = listViewAvailableHeight - (4 * 2);
+          
+          double baseHeight = screenHeight * 0.1;
+          double minHeight = 60;
+          double maxHeight = 100;
+
+          final double listViewAvailableHeight = baseHeight.clamp(minHeight, maxHeight);
 
           final double responsiveFontSize = 16.0 * (screenWidth / 600.0);
           final double clampedFontSize = responsiveFontSize.clamp(12.0, 20.0);
@@ -67,9 +69,11 @@ class _NationalFoodCategoryState extends State<NationalFoodCategory> {
             }
           }
 
-          const double buttonHorizontalPadding = 12.0 * 2;
-          const double buttonPaddingAround = 8.0 * 2;
-          final double minimumButtonWidth = maxTextWidth + buttonHorizontalPadding + buttonPaddingAround;
+          const double buttonHorizontalPadding = 40.0 * 2; // ซ้าย-ขวา padding ปุ่ม
+          const double buttonPaddingAround = 5.0 * 2; // margin ปุ่ม
+
+          final double minimumButtonWidth =
+              maxTextWidth + buttonHorizontalPadding + buttonPaddingAround;
 
           return SizedBox(
             height: listViewAvailableHeight,
@@ -81,32 +85,42 @@ class _NationalFoodCategoryState extends State<NationalFoodCategory> {
                 final bool isSelected = selectedCategoryId == foodSet.foodSetId;
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isSelected ? const Color(0xFF673AB7) : const Color(0xFFF6F6F6),
-                      padding: const EdgeInsets.all(12),
-                      minimumSize: Size(minimumButtonWidth, targetButtonHeight),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(targetButtonHeight / 2),
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                  child: SizedBox(
+                    height: listViewAvailableHeight * 0.9, 
+                    width: minimumButtonWidth,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: isSelected
+                            ? const Color(0xFF02CCFE)
+                            : const Color(0xFFF6F6F6),
+                        elevation: 0,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: isSelected
+                              ? const BorderSide(color: Colors.black, width: 1.5)
+                              : BorderSide.none,
+                        ),
+                        minimumSize: Size(minimumButtonWidth, listViewAvailableHeight * 0.9),
                       ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        selectedCategoryId = foodSet.foodSetId;
-                      });
-                      widget.onSelected(foodSet);
-                    },
-                    child: Text(
-                      foodSet.foodSetName,
-                      style: TextStyle(
-                        fontSize: clampedFontSize,
-                        color: isSelected ? Colors.white : const Color(0xFF673AB7),
-                        fontWeight: FontWeight.bold,
+                      onPressed: () {
+                        setState(() {
+                          selectedCategoryId = foodSet.foodSetId;
+                        });
+                        widget.onSelected(foodSet);
+                      },
+                      child: Text(
+                        foodSet.foodSetName,
+                        style: TextStyle(
+                          fontSize: clampedFontSize,
+                          color: isSelected ? Colors.white : Colors.black45,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 );
