@@ -12,6 +12,7 @@ class FoodListWidget extends StatefulWidget {
   final String searchText;
   final String selectedFoodSetId;
   final String? selectedFoodCatId;
+  final Function(String)? onCategoryChanged;
 
   const FoodListWidget({
     super.key,
@@ -19,6 +20,7 @@ class FoodListWidget extends StatefulWidget {
     required this.searchText,
     required this.selectedFoodSetId,
     required this.selectedFoodCatId,
+    this.onCategoryChanged,
   });
 
   @override
@@ -35,8 +37,9 @@ class _FoodListWidgetState extends State<FoodListWidget> {
   void didUpdateWidget(FoodListWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    final foodListState = context.read<FoodListBloc>().state;
+
     if (widget.selectedFoodSetId != oldWidget.selectedFoodSetId) {
-      final foodListState = context.read<FoodListBloc>().state;
       if (foodListState is FoodItemLoaded) {
         final filteredFood = foodListState.foodItem.where((food) {
           final matchSearch = widget.searchText.isEmpty ||
@@ -55,6 +58,11 @@ class _FoodListWidgetState extends State<FoodListWidget> {
             widget.selectedFoodCatId != firstCategoryId) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _scrollToCategory(firstCategoryId);
+
+            
+            if (widget.onCategoryChanged != null) {
+              widget.onCategoryChanged!(firstCategoryId);
+            }
           });
         }
       }
@@ -179,73 +187,117 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                           ),
                           itemBuilder: (context, index) {
                             final food = items[index];
-                            return Card(
-                              color:
-                                  const Color.fromARGB(255, 255, 255, 255), 
-                              elevation: 4,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              clipBehavior: Clip.antiAlias,
-                              child: InkWell(
-                                onTap: () => widget.onFoodSelected(food),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Expanded(
-                                      flex: 5,
-                                      child: Container(
-                                        color: Colors.white,
-                                        child: Image.network(
-                                          food.imageName,
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                          errorBuilder: (context, error,
-                                                  stackTrace) =>
-                                              const Icon(Icons.broken_image),
-                                        ),
+                            final isOutOfStock = food.isOutStock;
+
+                            return Opacity(
+                              opacity: isOutOfStock ? 0.5 : 1.0,
+                              child: Stack(
+                                children: [
+                                  Card(
+                                    color: Colors.white,
+                                    elevation: 4,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: InkWell(
+                                      onTap: isOutOfStock
+                                          ? null
+                                          : () => widget.onFoodSelected(food),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Expanded(
+                                            flex: 5,
+                                            child: Stack(
+                                              children: [
+                                                Container(
+                                                  color: Colors.white,
+                                                  child: Image.network(
+                                                    food.imageName,
+                                                    fit: BoxFit.cover,
+                                                    width: double.infinity,
+                                                    errorBuilder: (context,
+                                                            error,
+                                                            stackTrace) =>
+                                                        const Icon(
+                                                            Icons.broken_image),
+                                                  ),
+                                                ),
+                                                if (isOutOfStock)
+                                                  Positioned.fill(
+                                                    child: Container(
+                                                      color: Colors.white
+                                                          .withOpacity(0.4),
+                                                      child: const Center(
+                                                        child: Text(
+                                                          'OUT OF STOCK',
+                                                          style: TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 28,
+                                                            fontWeight:
+                                                                FontWeight.bold,
+                                                            letterSpacing: 1.5,
+                                                          ),
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 4,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    food.foodName,
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Color(0xFF4F4F4F),
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  const SizedBox(height: 4),
+                                                  Text(
+                                                    food.foodDesc,
+                                                    style: const TextStyle(
+                                                        color:
+                                                            Color(0xFF828282)),
+                                                    maxLines: 2,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                  ),
+                                                  const Spacer(),
+                                                  Text(
+                                                    '\$${food.foodPrice}',
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.black,
+                                                      fontSize: 16,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    Expanded(
-                                      flex: 4,
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              food.foodName,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Color(0xFF4F4F4F),
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              food.foodDesc,
-                                              style: const TextStyle(
-                                                  color: Color(0xFF828282)),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const Spacer(),
-                                            Text(
-                                              '\$${food.foodPrice}',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.black,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             );
                           },

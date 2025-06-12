@@ -22,8 +22,6 @@ class RightPanel extends StatefulWidget {
 class _RightPanelState extends State<RightPanel> {
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
     double total = widget.selectedFoods
         .fold(0, (sum, item) => sum + (item.foodPrice * item.quantity));
     final double screenHeight = MediaQuery.of(context).size.height;
@@ -64,7 +62,7 @@ class _RightPanelState extends State<RightPanel> {
           ),
 
           const Padding(
-            padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+            padding: EdgeInsets.fromLTRB(30, 10, 30, 10),
             child: Text(
               'My Order',
               style: TextStyle(
@@ -76,16 +74,27 @@ class _RightPanelState extends State<RightPanel> {
           ),
           Center(
             child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              height: 2,
-              width: MediaQuery.of(context).size.width * 0.4,
-              color: Colors.black,
+              padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+              child: const Divider(
+                thickness: 2,
+                color: Colors.grey,
+              ),
             ),
           ),
 
           // Order list
           Expanded(
-            child: ListView.builder(
+            child: widget.selectedFoods.isEmpty
+              ? const Align(
+                alignment: Alignment.topCenter,
+                child: Text(
+                  'No order selected',
+                  style: TextStyle(
+                    color: Colors.black45,
+                  ),
+                ),
+              )      
+              : ListView.builder(
                 itemCount: widget.selectedFoods.length,
                 itemBuilder: (context, index) {
                   final food = widget.selectedFoods[index];
@@ -94,7 +103,7 @@ class _RightPanelState extends State<RightPanel> {
                     decoration: BoxDecoration(
                         color: const Color(0xFFF6F6F6),
                         borderRadius: BorderRadius.circular(10)),
-                    margin: const EdgeInsetsDirectional.all(10),
+                    margin: const EdgeInsets.fromLTRB(30, 10, 30, 10),
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Column(
@@ -164,37 +173,57 @@ class _RightPanelState extends State<RightPanel> {
                   );
                 }),
           ),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+              child: const Divider(
+                thickness: 1,
+                color: Colors.grey,
+              ),
+            ),
+          ),
 
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text('Subtotal:',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF4F4F4F),
+                    )),
                 Text('\$${total.toStringAsFixed(2)}',
                     style: const TextStyle(
-                        fontSize: 18,
-                        color: Color(0xFF7B61FF),
+                        fontSize: 24,
+                        color: Color(0xFF4F4F4F),
                         fontWeight: FontWeight.bold)),
               ],
             ),
           ),
           Center(
             child: Container(
-              padding: const EdgeInsetsDirectional.all(10),
-              margin: const EdgeInsetsDirectional.all(10),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              margin: const EdgeInsets.fromLTRB(30, 5, 30, 30),
               decoration: BoxDecoration(
-                color: const Color(0xFF32CD32),
+                color: widget.selectedFoods.isEmpty
+                    ? const Color(0xFF8D8D8D) 
+                    : const Color(0xFF32CD32),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextButton.icon(
-                onPressed: () {},
+                onPressed: widget.selectedFoods.isEmpty
+                    ? null 
+                    : () {
+                        
+                      },
                 icon: const Icon(Icons.shopping_cart, color: Colors.white),
                 label: Text(
                   'Confirm Order (${widget.selectedFoods.length})',
-                  style: const TextStyle(color: Colors.white),
+                  style: const TextStyle(
+                    color: Colors.white,fontSize: 26
+                  ),
                 ),
               ),
             ),

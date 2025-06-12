@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, depend_on_referenced_packages
+// ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
@@ -118,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 padding: const EdgeInsetsDirectional.all(10),
                                 child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
-                                    backgroundColor: Color(0xFF496EE2),
+                                    backgroundColor: const Color(0xFF496EE2),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10),
                                     ),

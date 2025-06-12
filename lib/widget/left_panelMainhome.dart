@@ -59,7 +59,7 @@ class _LeftPanelState extends State<LeftPanel> {
             children: [
               SizedBox(height: screenHeight * 0.0),
               Padding(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.fromLTRB(20,10,20,10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -95,13 +95,15 @@ class _LeftPanelState extends State<LeftPanel> {
               ),
               const SizedBox(height: 10),
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.fromLTRB(20,10,20,10),
                 child: NationalFoodCategory(
                   onSelected: (selectedFoodSet) {
                     print('หมวด: ${selectedFoodSet.foodSetName}');
                     print('ID: ${selectedFoodSet.foodSetId}');
                     setState(() {
                       _selectedFoodSetId = selectedFoodSet.foodSetId;
+                      _selectedFoodCatId =
+                          null; 
                     });
                   },
                 ),
