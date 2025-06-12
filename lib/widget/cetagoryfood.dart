@@ -50,6 +50,14 @@ class _CategoryFoodState extends State<CategoryFood> {
                     .where((cat) => usedCategoryIds.contains(cat.foodCatId))
                     .toList();
 
+                if (selectedCategoryId == null &&
+                    filteredCategories.isNotEmpty) {
+                  selectedCategoryId = filteredCategories.first.foodCatId;
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    widget.onCategorySelected(selectedCategoryId!);
+                  });
+                }
+
                 final screenHeight = MediaQuery.of(context).size.height;
                 final screenWidth = MediaQuery.of(context).size.width;
                 final double baseHeight = screenHeight * 0.1;

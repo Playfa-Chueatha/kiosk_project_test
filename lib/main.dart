@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Kiosk Project Test',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
           useMaterial3: true,
         ),
         home: const MyHomePage(),

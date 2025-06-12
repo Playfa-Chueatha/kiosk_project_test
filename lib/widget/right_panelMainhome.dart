@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:kiosk_project_test/data/Data_food.dart';
 
-class RightPanel extends StatelessWidget {
+class RightPanel extends StatefulWidget {
   final List<FoodData> selectedFoods;
   final Function(String) onIncrease;
   final Function(String) onDecrease;
@@ -16,8 +16,16 @@ class RightPanel extends StatelessWidget {
   });
 
   @override
+  State<RightPanel> createState() => _RightPanelState();
+}
+
+class _RightPanelState extends State<RightPanel> {
+  @override
   Widget build(BuildContext context) {
-    double total = selectedFoods.fold(0, (sum, item) => sum + (item.foodPrice * item.quantity));
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    double total = widget.selectedFoods
+        .fold(0, (sum, item) => sum + (item.foodPrice * item.quantity));
     final double screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
@@ -33,46 +41,60 @@ class RightPanel extends StatelessWidget {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: screenHeight * 0.03),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const Text(
-                  'My Order',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-                const Spacer(),
-                PopupMenuButton<String>(
-                  icon: Image.asset('assets/images/flag_usa.png',
-                      height: 30, width: 30),
-                  onSelected: (value) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('เลือก: $value')),
-                    );
-                  },
-                  itemBuilder: (context) => [
-                    const PopupMenuItem(
-                        value: 'English', child: Text('English')),
-                    const PopupMenuItem(
-                        value: 'Setting', child: Text('Setting')),
-                    const PopupMenuItem(
-                        value: 'Store Management',
-                        child: Text('Store Management')),
-                  ],
-                ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: PopupMenuButton<String>(
+              icon: Image.asset('assets/images/flag_usa.png',
+                  height: 30, width: 30),
+              onSelected: (value) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('เลือก: $value')),
+                );
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem(value: 'English', child: Text('English')),
+                PopupMenuItem(value: 'Setting', child: Text('Setting')),
+                PopupMenuItem(
+                    value: 'Store Management', child: Text('Store Management')),
               ],
             ),
           ),
+
+          const Padding(
+            padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+            child: Text(
+              'My Order',
+              style: TextStyle(
+                color: Color(0xFF4F4F4F),
+                fontSize: 34,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Center(
+            child: Container(
+              margin: const EdgeInsets.symmetric(vertical: 10),
+              height: 2,
+              width: MediaQuery.of(context).size.width * 0.4,
+              color: Colors.black,
+            ),
+          ),
+
           // Order list
           Expanded(
             child: ListView.builder(
-                itemCount: selectedFoods.length,
+                itemCount: widget.selectedFoods.length,
                 itemBuilder: (context, index) {
-                  final food = selectedFoods[index];
+                  final food = widget.selectedFoods[index];
 
-                  return Padding(
+                  return Container(
+                    decoration: BoxDecoration(
+                        color: const Color(0xFFF6F6F6),
+                        borderRadius: BorderRadius.circular(10)),
+                    margin: const EdgeInsetsDirectional.all(10),
                     padding:
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Column(
@@ -81,44 +103,62 @@ class RightPanel extends StatelessWidget {
                         Text(
                           'x${food.quantity} ${food.foodName}',
                           style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                         Text(
                           food.foodDesc,
                           style:
-                              const TextStyle(fontSize: 14, color: Colors.grey),
+                              const TextStyle(fontSize: 12, color: Colors.grey),
                         ),
-                        
                         const SizedBox(height: 8),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            Text(
+                              '\$${(food.foodPrice * food.quantity).toStringAsFixed(2)} ',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF7B61FF),
+                              ),
+                            ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
+                                RawMaterialButton(
+                                  onPressed: () =>
+                                      widget.onDecrease(food.foodId),
+                                  shape: const CircleBorder(),
+                                  fillColor: Colors.grey[300],
+                                  constraints: const BoxConstraints.tightFor(
+                                      width: 26, height: 26),
+                                  elevation: 0,
+                                  child: const Icon(Icons.remove,
+                                      color: Colors.black, size: 20),
+                                ),
+                                const SizedBox(width: 8),
                                 Text(
-                                  '\$${(food.foodPrice * food.quantity).toStringAsFixed(2)} ',
-                                  style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFF7B61FF),
-                                  ),
+                                  food.quantity.toString().padLeft(2, '0'),
+                                  style: const TextStyle(fontSize: 16),
                                 ),
-                                IconButton(
-                                  icon: const Icon(Icons.remove_circle_outline),
-                                  onPressed: () => onDecrease(food.foodId),
-                                ),
-                                Text('${food.quantity}',
-                                    style: const TextStyle(fontSize: 16)),
-                                IconButton(
-                                  icon: const Icon(Icons.add_circle_outline),
-                                  onPressed: () => onIncrease(food.foodId),
+                                const SizedBox(width: 8),
+                                RawMaterialButton(
+                                  onPressed: () =>
+                                      widget.onIncrease(food.foodId),
+                                  shape: const CircleBorder(),
+                                  fillColor: Colors.grey[300],
+                                  constraints: const BoxConstraints.tightFor(
+                                      width: 26, height: 26),
+                                  elevation: 0,
+                                  child: const Icon(Icons.add,
+                                      color: Colors.black, size: 20),
                                 ),
                               ],
-                            ),
+                            )
                           ],
                         ),
-                        const Divider(),
                       ],
                     ),
                   );
@@ -130,21 +170,35 @@ class RightPanel extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Total:',
+                const Text('Subtotal:',
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 Text('\$${total.toStringAsFixed(2)}',
-                    style: const TextStyle(fontSize: 18)),
+                    style: const TextStyle(
+                        fontSize: 18,
+                        color: Color(0xFF7B61FF),
+                        fontWeight: FontWeight.bold)),
               ],
             ),
           ),
-          Padding(padding: const EdgeInsetsDirectional.all(20),
-            child: OutlinedButton.icon(
-              onPressed: (){}, 
-              icon: const Icon(Icons.shopping_cart),
-              label: const Text('Confirm Order')
-            )
-          )
+          Center(
+            child: Container(
+              padding: const EdgeInsetsDirectional.all(10),
+              margin: const EdgeInsetsDirectional.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF32CD32),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TextButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                label: Text(
+                  'Confirm Order (${widget.selectedFoods.length})',
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

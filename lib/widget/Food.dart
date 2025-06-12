@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
 import 'package:kiosk_project_test/bloc/loc_food_data.dart';
 import 'package:kiosk_project_test/data/Data_food.dart';
@@ -25,43 +26,58 @@ class FoodListWidget extends StatefulWidget {
 }
 
 class _FoodListWidgetState extends State<FoodListWidget> {
-  final ScrollController _scrollController = ScrollController();
-
-  final Map<String, GlobalKey> _categoryKeys = {};
-
-  List<String> _currentCategoryIds = [];
+  final ItemScrollController _scrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
+  final Map<String, int> _categoryIndexMap = {};
 
   @override
   void didUpdateWidget(FoodListWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.searchText != oldWidget.searchText ||
-        widget.selectedFoodSetId != oldWidget.selectedFoodSetId) {
-      _categoryKeys.clear();
+    if (widget.selectedFoodSetId != oldWidget.selectedFoodSetId) {
+      final foodListState = context.read<FoodListBloc>().state;
+      if (foodListState is FoodItemLoaded) {
+        final filteredFood = foodListState.foodItem.where((food) {
+          final matchSearch = widget.searchText.isEmpty ||
+              food.foodName
+                  .toLowerCase()
+                  .contains(widget.searchText.toLowerCase());
+          final matchSetId = widget.selectedFoodSetId.isEmpty ||
+              food.foodSetId == widget.selectedFoodSetId;
+          return matchSearch && matchSetId;
+        }).toList();
+
+        final firstCategoryId =
+            filteredFood.isNotEmpty ? filteredFood.first.foodCatId : null;
+
+        if (firstCategoryId != null &&
+            widget.selectedFoodCatId != firstCategoryId) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollToCategory(firstCategoryId);
+          });
+        }
+      }
     }
 
     if (widget.selectedFoodCatId != null &&
         widget.selectedFoodCatId != oldWidget.selectedFoodCatId) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Future.delayed(const Duration(milliseconds: 200), () {
-          _scrollToCategory(widget.selectedFoodCatId!);
-        });
+      Future.delayed(const Duration(milliseconds: 300), () {
+        _scrollToCategory(widget.selectedFoodCatId!);
       });
     }
   }
 
   void _scrollToCategory(String categoryId) {
-    final keyContext = _categoryKeys[categoryId]?.currentContext;
-    if (keyContext != null) {
-      print('Scrolling to category: $categoryId');
-      Scrollable.ensureVisible(
-        keyContext,
+    final index = _categoryIndexMap[categoryId];
+    if (index != null) {
+      _scrollController.scrollTo(
+        index: index,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
     } else {
-      print('Category $categoryId not found in _categoryKeys');
-      print('Available keys: ${_categoryKeys.keys.toList()}');
+      print('ไม่พบ index สำหรับ categoryId: $categoryId');
     }
   }
 
@@ -82,7 +98,6 @@ class _FoodListWidgetState extends State<FoodListWidget> {
               if (state is FoodItemLoaded) {
                 final allFood = state.foodItem;
 
-                
                 final filteredFood = allFood.where((food) {
                   final matchSearch = widget.searchText.isEmpty ||
                       food.foodName
@@ -91,46 +106,41 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                   final matchSetId = widget.selectedFoodSetId.isEmpty ||
                       food.foodSetId == widget.selectedFoodSetId;
 
-                  
-                  final matchCatId = widget.selectedFoodCatId == null ||
-                      food.foodCatId == widget.selectedFoodCatId;
-
-                  return matchSearch && matchSetId && matchCatId;
+                  return matchSearch && matchSetId;
                 }).toList();
 
-                
                 final Map<String, List<FoodData>> groupedFood = {};
                 for (var food in filteredFood) {
                   groupedFood.putIfAbsent(food.foodCatId, () => []).add(food);
                 }
 
-                
                 final sortedEntries = groupedFood.entries.toList()
                   ..sort((a, b) {
-                    final nameA = categoryNameMap[a.key] ?? '';
-                    final nameB = categoryNameMap[b.key] ?? '';
+                    final nameA = categoryNameMap[a.key] ?? 'Unknown';
+                    final nameB = categoryNameMap[b.key] ?? 'Unknown';
+
+                    if (nameA == 'Unknown' && nameB == 'Unknown') return 0;
+                    if (nameA == 'Unknown') return 1;
+                    if (nameB == 'Unknown') return -1;
                     return nameA.compareTo(nameB);
                   });
 
-                
-                _currentCategoryIds = sortedEntries.map((e) => e.key).toList();
-
-                
-                for (var catId in _currentCategoryIds) {
-                  _categoryKeys.putIfAbsent(catId, () => GlobalKey());
+                for (int i = 0; i < sortedEntries.length; i++) {
+                  _categoryIndexMap[sortedEntries[i].key] = i;
                 }
 
-                return ListView(
-                  controller: _scrollController,
-                  padding: EdgeInsets.all(16 * scaleFactor),
-                  children: sortedEntries.map((entry) {
+                return ScrollablePositionedList.builder(
+                  itemScrollController: _scrollController,
+                  itemPositionsListener: _itemPositionsListener,
+                  itemCount: sortedEntries.length,
+                  itemBuilder: (context, index) {
+                    final entry = sortedEntries[index];
                     final categoryId = entry.key;
-                    final categoryName = categoryNameMap[categoryId] ?? 'Unknown';
+                    final categoryName =
+                        categoryNameMap[categoryId] ?? 'Unknown';
                     final items = entry.value;
-                    final key = _categoryKeys[categoryId]!;
 
                     return Column(
-                      key: key,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
@@ -145,7 +155,8 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                           physics: const NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
                           itemCount: items.length,
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: () {
                               final orientation =
                                   MediaQuery.of(context).orientation;
@@ -169,6 +180,8 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                           itemBuilder: (context, index) {
                             final food = items[index];
                             return Card(
+                              color:
+                                  const Color.fromARGB(255, 255, 255, 255), 
                               elevation: 4,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -181,12 +194,16 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                                   children: [
                                     Expanded(
                                       flex: 5,
-                                      child: Image.network(
-                                        food.imageName,
-                                        fit: BoxFit.cover,
-                                        width: double.infinity,
-                                        errorBuilder: (context, error, stackTrace) =>
-                                            const Icon(Icons.broken_image),
+                                      child: Container(
+                                        color: Colors.white,
+                                        child: Image.network(
+                                          food.imageName,
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          errorBuilder: (context, error,
+                                                  stackTrace) =>
+                                              const Icon(Icons.broken_image),
+                                        ),
                                       ),
                                     ),
                                     Expanded(
@@ -201,6 +218,7 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                                               food.foodName,
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
+                                                color: Color(0xFF4F4F4F),
                                               ),
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
@@ -209,7 +227,7 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                                             Text(
                                               food.foodDesc,
                                               style: const TextStyle(
-                                                  color: Colors.grey),
+                                                  color: Color(0xFF828282)),
                                               maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                             ),
@@ -218,7 +236,8 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                                               '\$${food.foodPrice}',
                                               style: const TextStyle(
                                                 fontWeight: FontWeight.bold,
-                                                color: Colors.grey,
+                                                color: Colors.black,
+                                                fontSize: 16,
                                               ),
                                             ),
                                           ],
@@ -234,7 +253,7 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                         SizedBox(height: 24 * scaleFactor),
                       ],
                     );
-                  }).toList(),
+                  },
                 );
               } else if (state is FoodSetLoading) {
                 return const Center(child: CircularProgressIndicator());
