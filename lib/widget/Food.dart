@@ -15,16 +15,14 @@ class FoodListWidget extends StatefulWidget {
   final Function(String)? onCategoryChanged;
   final Function(String)? onVisibleCategoryChanged;
 
-
-  const FoodListWidget({
-    super.key,
-    required this.onFoodSelected,
-    required this.searchText,
-    required this.selectedFoodSetId,
-    required this.selectedFoodCatId,
-    this.onCategoryChanged,
-    this.onVisibleCategoryChanged
-  });
+  const FoodListWidget(
+      {super.key,
+      required this.onFoodSelected,
+      required this.searchText,
+      required this.selectedFoodSetId,
+      required this.selectedFoodCatId,
+      this.onCategoryChanged,
+      this.onVisibleCategoryChanged});
 
   @override
   State<FoodListWidget> createState() => _FoodListWidgetState();
@@ -62,7 +60,6 @@ class _FoodListWidgetState extends State<FoodListWidget> {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _scrollToCategory(firstCategoryId);
 
-            
             if (widget.onCategoryChanged != null) {
               widget.onCategoryChanged!(firstCategoryId);
             }
@@ -224,8 +221,14 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                                                     errorBuilder: (context,
                                                             error,
                                                             stackTrace) =>
-                                                        const Icon(
-                                                            Icons.broken_image),
+                                                       const SizedBox(
+                                                        child: Center(
+                                                          child: Icon(
+                                                            Icons.broken_image,
+                                                            color: Colors.grey,
+                                                          ),
+                                                        ),
+                                                       )
                                                   ),
                                                 ),
                                                 if (isOutOfStock)
@@ -283,14 +286,21 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                                                         TextOverflow.ellipsis,
                                                   ),
                                                   const Spacer(),
-                                                  
-                                                  Text(isOutOfStock ?'Out of Stock' :'\$${food.foodPrice}',
+                                                  Text(
+                                                    isOutOfStock
+                                                        ? 'Out of Stock'
+                                                        : '\$${food.foodPrice}',
                                                     style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
-                                                      color: isOutOfStock ?Colors.red : Colors.black,
+                                                      color: isOutOfStock
+                                                          ? Colors.red
+                                                          : Colors.black,
                                                       fontSize: 16,
-                                                      decoration: isOutOfStock ? TextDecoration.underline : TextDecoration.none,
+                                                      decoration: isOutOfStock
+                                                          ? TextDecoration
+                                                              .underline
+                                                          : TextDecoration.none,
                                                     ),
                                                   ),
                                                 ],

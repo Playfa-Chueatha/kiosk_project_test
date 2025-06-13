@@ -215,7 +215,9 @@ class _RightPanelState extends State<RightPanel> {
                 Text('\$${total.toStringAsFixed(2)}',
                     style: TextStyle(
                         fontSize: fontsizesubtotal,
-                        color: const Color(0xFF4F4F4F),
+                        color: widget.selectedFoods.isEmpty
+                              ?const Color(0xFF4F4F4F)
+                              :const Color(0xFF7B61FF),
                         fontWeight: FontWeight.bold)),
               ],
             ),
