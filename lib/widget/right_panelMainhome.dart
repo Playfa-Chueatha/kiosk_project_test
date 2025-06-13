@@ -25,6 +25,17 @@ class _RightPanelState extends State<RightPanel> {
     double total = widget.selectedFoods
         .fold(0, (sum, item) => sum + (item.foodPrice * item.quantity));
     final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+
+    double fontsizeOrder = screenWidth * 0.02;
+    double fontsizeNoOrder = screenWidth * 0.01;
+    double fontsizefoodPrice = screenWidth * 0.01;
+    double fontsizequantity = screenWidth * 0.01;
+    double fontsizefoodDesc = screenWidth * 0.008;
+    double fontsizesubtotal = screenWidth * 0.015;
+    double fontsizeConfirmorder = screenWidth * 0.014;
+    final buttonSizequantity = screenWidth * 0.02;
+    final buttonSizeIconquantity = screenWidth * 0.01;
 
     return Container(
       decoration: BoxDecoration(
@@ -61,20 +72,20 @@ class _RightPanelState extends State<RightPanel> {
             ),
           ),
 
-          const Padding(
-            padding: EdgeInsets.fromLTRB(30, 10, 30, 10),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(40, 10, 40, 10),
             child: Text(
               'My Order',
               style: TextStyle(
-                color: Color(0xFF4F4F4F),
-                fontSize: 34,
+                color: const Color(0xFF4F4F4F),
+                fontSize: fontsizeOrder,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
           Center(
             child: Container(
-              padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+              padding: const EdgeInsets.fromLTRB(40, 5, 40, 5),
               child: const Divider(
                 thickness: 2,
                 color: Colors.grey,
@@ -85,97 +96,104 @@ class _RightPanelState extends State<RightPanel> {
           // Order list
           Expanded(
             child: widget.selectedFoods.isEmpty
-              ? const Align(
-                alignment: Alignment.topCenter,
-                child: Text(
-                  'No order selected',
-                  style: TextStyle(
-                    color: Colors.black45,
-                  ),
-                ),
-              )      
-              : ListView.builder(
-                itemCount: widget.selectedFoods.length,
-                itemBuilder: (context, index) {
-                  final food = widget.selectedFoods[index];
+                ? Align(
+                    alignment: Alignment.topCenter,
+                    child: Text(
+                      'No order selected',
+                      style: TextStyle(
+                        color: Colors.black45,
+                        fontSize: fontsizeNoOrder,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: widget.selectedFoods.length,
+                    itemBuilder: (context, index) {
+                      final food = widget.selectedFoods[index];
 
-                  return Container(
-                    decoration: BoxDecoration(
-                        color: const Color(0xFFF6F6F6),
-                        borderRadius: BorderRadius.circular(10)),
-                    margin: const EdgeInsets.fromLTRB(30, 10, 30, 10),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'x${food.quantity} ${food.foodName}',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                        Text(
-                          food.foodDesc,
-                          style:
-                              const TextStyle(fontSize: 12, color: Colors.grey),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      return Container(
+                        decoration: BoxDecoration(
+                            color: const Color(0xFFF6F6F6),
+                            borderRadius: BorderRadius.circular(10)),
+                        margin: const EdgeInsets.fromLTRB(40, 10, 30, 40),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '\$${(food.foodPrice * food.quantity).toStringAsFixed(2)} ',
-                              style: const TextStyle(
-                                fontSize: 16,
+                              'x${food.quantity} ${food.foodName}',
+                              style: TextStyle(
+                                fontSize: fontsizefoodPrice,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF7B61FF),
+                                decoration: TextDecoration.underline,
                               ),
                             ),
+                            Text(
+                              food.foodDesc,
+                              style: TextStyle(
+                                  fontSize: fontsizefoodDesc,
+                                  color: Colors.grey),
+                            ),
+                            const SizedBox(height: 8),
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                RawMaterialButton(
-                                  onPressed: () =>
-                                      widget.onDecrease(food.foodId),
-                                  shape: const CircleBorder(),
-                                  fillColor: Colors.grey[300],
-                                  constraints: const BoxConstraints.tightFor(
-                                      width: 26, height: 26),
-                                  elevation: 0,
-                                  child: const Icon(Icons.remove,
-                                      color: Colors.black, size: 20),
-                                ),
-                                const SizedBox(width: 8),
                                 Text(
-                                  food.quantity.toString().padLeft(2, '0'),
-                                  style: const TextStyle(fontSize: 16),
+                                  '\$${(food.foodPrice * food.quantity).toStringAsFixed(2)} ',
+                                  style: TextStyle(
+                                    fontSize: fontsizefoodPrice,
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF7B61FF),
+                                  ),
                                 ),
-                                const SizedBox(width: 8),
-                                RawMaterialButton(
-                                  onPressed: () =>
-                                      widget.onIncrease(food.foodId),
-                                  shape: const CircleBorder(),
-                                  fillColor: Colors.grey[300],
-                                  constraints: const BoxConstraints.tightFor(
-                                      width: 26, height: 26),
-                                  elevation: 0,
-                                  child: const Icon(Icons.add,
-                                      color: Colors.black, size: 20),
-                                ),
+                                Row(
+                                  children: [
+                                    RawMaterialButton(
+                                      onPressed: () =>
+                                          widget.onDecrease(food.foodId),
+                                      shape: const CircleBorder(),
+                                      fillColor: Colors.grey[300],
+                                      constraints: BoxConstraints.tightFor(
+                                          width: buttonSizequantity,
+                                          height: 26),
+                                      elevation: 0,
+                                      child: Icon(Icons.remove,
+                                          color: Colors.black,
+                                          size: buttonSizeIconquantity),
+                                    ),
+                                    SizedBox(width: screenWidth * 0.004),
+                                    Text(
+                                      food.quantity.toString().padLeft(2, '0'),
+                                      style:
+                                          TextStyle(fontSize: fontsizequantity),
+                                    ),
+                                    SizedBox(width: screenWidth * 0.004),
+                                    RawMaterialButton(
+                                      onPressed: () =>
+                                          widget.onIncrease(food.foodId),
+                                      shape: const CircleBorder(),
+                                      fillColor: Colors.grey[300],
+                                      constraints: BoxConstraints.tightFor(
+                                          width: buttonSizequantity,
+                                          height: 26),
+                                      elevation: 0,
+                                      child: Icon(Icons.add,
+                                          color: Colors.black,
+                                          size: buttonSizeIconquantity),
+                                    ),
+                                  ],
+                                )
                               ],
-                            )
+                            ),
                           ],
                         ),
-                      ],
-                    ),
-                  );
-                }),
+                      );
+                    }),
           ),
           Center(
             child: Container(
-              padding: const EdgeInsets.fromLTRB(30, 5, 30, 5),
+              padding: const EdgeInsets.fromLTRB(40, 5, 40, 5),
               child: const Divider(
                 thickness: 1,
                 color: Colors.grey,
@@ -184,46 +202,40 @@ class _RightPanelState extends State<RightPanel> {
           ),
 
           Padding(
-            padding: const EdgeInsets.fromLTRB(30, 10, 30, 10),
+            padding: const EdgeInsets.fromLTRB(40, 10, 40, 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text('Subtotal:',
+                Text('Subtotal:',
                     style: TextStyle(
-                      fontSize: 24,
+                      fontSize: fontsizesubtotal,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF4F4F4F),
+                      color: const Color(0xFF4F4F4F),
                     )),
                 Text('\$${total.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                        fontSize: 24,
-                        color: Color(0xFF4F4F4F),
+                    style: TextStyle(
+                        fontSize: fontsizesubtotal,
+                        color: const Color(0xFF4F4F4F),
                         fontWeight: FontWeight.bold)),
               ],
             ),
           ),
           Center(
             child: Container(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
+              padding: const EdgeInsets.fromLTRB(25, 20, 25, 20),
               margin: const EdgeInsets.fromLTRB(30, 5, 30, 30),
               decoration: BoxDecoration(
                 color: widget.selectedFoods.isEmpty
-                    ? const Color(0xFF8D8D8D) 
+                    ? const Color(0xFF8D8D8D)
                     : const Color(0xFF32CD32),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextButton.icon(
-                onPressed: widget.selectedFoods.isEmpty
-                    ? null 
-                    : () {
-                        
-                      },
+                onPressed: widget.selectedFoods.isEmpty ? null : () {},
                 icon: const Icon(Icons.shopping_cart, color: Colors.white),
                 label: Text(
                   'Confirm Order (${widget.selectedFoods.length})',
-                  style: const TextStyle(
-                    color: Colors.white,fontSize: 26
-                  ),
+                  style: TextStyle(color: Colors.white, fontSize: fontsizeConfirmorder),
                 ),
               ),
             ),

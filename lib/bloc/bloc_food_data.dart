@@ -1,34 +1,52 @@
 import 'dart:convert';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:equatable/equatable.dart';
 import 'package:kiosk_project_test/data/Data_food.dart';
 
-abstract class FoodListEvent {}
+abstract class FoodListEvent extends Equatable {
+  const FoodListEvent();
 
-class LoadFoodLsit extends FoodListEvent {}
+  @override
+  List<Object> get props => [];
+}
 
-abstract class FoodSetState {}
+class LoadFoodList extends FoodListEvent {}
+
+abstract class FoodSetState extends Equatable {
+  const FoodSetState();
+
+  @override
+  List<Object> get props => [];
+}
 
 class FoodSetLoading extends FoodSetState {}
 
 class FoodSetError extends FoodSetState {
   final String message;
-  FoodSetError(this.message);
+
+  const FoodSetError(this.message);
+
+  @override
+  List<Object> get props => [message];
 }
 
 class FoodItemLoaded extends FoodSetState {
   final List<FoodData> foodItem;
-  FoodItemLoaded(this.foodItem);
+
+  const FoodItemLoaded(this.foodItem);
+
+  @override
+  List<Object> get props => [foodItem];
 }
 
 class FoodListBloc extends Bloc<FoodListEvent, FoodSetState> {
   FoodListBloc() : super(FoodSetLoading()) {
-    on<LoadFoodLsit>(_onLoadFoodLsit);
+    on<LoadFoodList>(_onLoadFoodList);
   }
 
-  Future<void> _onLoadFoodLsit(
-    LoadFoodLsit event,
+  Future<void> _onLoadFoodList(
+    LoadFoodList event,
     Emitter<FoodSetState> emit,
   ) async {
     try {
@@ -41,7 +59,6 @@ class FoodListBloc extends Bloc<FoodListEvent, FoodSetState> {
       final List<dynamic> foodRaw = decodedData['result']['food'] as List;
       final List<FoodData> foodItems =
           foodRaw.map((item) => FoodData.fromJson(item)).toList();
-
 
       emit(FoodItemLoaded(foodItems));
     } catch (e) {

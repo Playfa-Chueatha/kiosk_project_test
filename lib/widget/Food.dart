@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kiosk_project_test/bloc/bloc_food_data.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
-import 'package:kiosk_project_test/bloc/loc_food_data.dart';
 import 'package:kiosk_project_test/data/Data_food.dart';
 
 class FoodListWidget extends StatefulWidget {
@@ -13,6 +13,8 @@ class FoodListWidget extends StatefulWidget {
   final String selectedFoodSetId;
   final String? selectedFoodCatId;
   final Function(String)? onCategoryChanged;
+  final Function(String)? onVisibleCategoryChanged;
+
 
   const FoodListWidget({
     super.key,
@@ -21,6 +23,7 @@ class FoodListWidget extends StatefulWidget {
     required this.selectedFoodSetId,
     required this.selectedFoodCatId,
     this.onCategoryChanged,
+    this.onVisibleCategoryChanged
   });
 
   @override
@@ -280,13 +283,14 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                                                         TextOverflow.ellipsis,
                                                   ),
                                                   const Spacer(),
-                                                  Text(
-                                                    '\$${food.foodPrice}',
-                                                    style: const TextStyle(
+                                                  
+                                                  Text(isOutOfStock ?'Out of Stock' :'\$${food.foodPrice}',
+                                                    style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold,
-                                                      color: Colors.black,
+                                                      color: isOutOfStock ?Colors.red : Colors.black,
                                                       fontSize: 16,
+                                                      decoration: isOutOfStock ? TextDecoration.underline : TextDecoration.none,
                                                     ),
                                                   ),
                                                 ],

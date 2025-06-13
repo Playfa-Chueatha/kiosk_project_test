@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
-import 'package:kiosk_project_test/bloc/loc_food_data.dart';
+import 'package:kiosk_project_test/bloc/bloc_food_data.dart'; // FoodCategoryBloc
+
 
 class CategoryFood extends StatefulWidget {
   final String selectedFoodSetId;
   final ValueChanged<String> onCategorySelected;
+  final String? currentVisibleCategoryId;
 
   const CategoryFood({
     super.key,
     required this.selectedFoodSetId,
     required this.onCategorySelected,
+    this.currentVisibleCategoryId,
   });
 
   @override
@@ -18,15 +21,15 @@ class CategoryFood extends StatefulWidget {
 }
 
 class _CategoryFoodState extends State<CategoryFood> {
-  String? selectedCategoryId;
-  double? maxButtonWidth;
+  String? _selectedCategoryIdInternal;
+  double? _maxButtonWidth;
   final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     BlocProvider.of<FoodCategoryBloc>(context).add(LoadFoodCategories());
-    BlocProvider.of<FoodListBloc>(context).add(LoadFoodLsit());
+    BlocProvider.of<FoodListBloc>(context).add(LoadFoodList());
   }
 
   @override
@@ -34,15 +37,22 @@ class _CategoryFoodState extends State<CategoryFood> {
     super.didUpdateWidget(oldWidget);
     if (widget.selectedFoodSetId != oldWidget.selectedFoodSetId) {
       setState(() {
-        selectedCategoryId = null;
-        maxButtonWidth = null; // รีเซ็ตความกว้างเมื่อเปลี่ยน foodSet
+        _selectedCategoryIdInternal = null;
+        _maxButtonWidth = null;
       });
-      BlocProvider.of<FoodCategoryBloc>(context).add(LoadFoodCategories());
-      BlocProvider.of<FoodListBloc>(context).add(LoadFoodLsit());
+    }
+
+    if (widget.currentVisibleCategoryId != oldWidget.currentVisibleCategoryId && widget.currentVisibleCategoryId != null) {
+      setState(() {
+        _selectedCategoryIdInternal = widget.currentVisibleCategoryId;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToSelectedCategory();
+      });
     }
   }
 
-  double calculateTextWidth(String text, TextStyle style) {
+  double _calculateTextWidth(String text, TextStyle style) {
     final TextPainter textPainter = TextPainter(
       text: TextSpan(text: text, style: style),
       maxLines: 1,
@@ -51,14 +61,37 @@ class _CategoryFoodState extends State<CategoryFood> {
     return textPainter.size.width;
   }
 
-  void _scrollToIndex(int index) {
-    if (maxButtonWidth == null) return;
-    final targetOffset = index * maxButtonWidth!;
-    _scrollController.animateTo(
-      targetOffset,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+  void _scrollToSelectedCategory() {
+    if (_maxButtonWidth == null || _selectedCategoryIdInternal == null) return;
+
+    final foodCategoryState = context.read<FoodCategoryBloc>().state;
+    if (foodCategoryState is! FoodCategoryLoaded) return;
+
+    final foodListState = context.read<FoodListBloc>().state;
+    if (foodListState is! FoodItemLoaded) return;
+
+    final filteredFood = foodListState.foodItem
+        .where((food) => food.foodSetId == widget.selectedFoodSetId)
+        .toList();
+
+    final usedCategoryIds = filteredFood.map((food) => food.foodCatId).toSet();
+
+    final filteredCategories = foodCategoryState.categories
+        .where((cat) => usedCategoryIds.contains(cat.foodCatId))
+        .toList();
+
+    filteredCategories.sort((a, b) => a.foodCatSorting.compareTo(b.foodCatSorting));
+
+    final selectedIndex = filteredCategories.indexWhere((cat) => cat.foodCatId == _selectedCategoryIdInternal);
+
+    if (selectedIndex != -1) {
+      final targetOffset = selectedIndex * _maxButtonWidth!;
+      _scrollController.animateTo(
+        targetOffset,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 
   @override
@@ -95,22 +128,23 @@ class _CategoryFoodState extends State<CategoryFood> {
                     .where((cat) => usedCategoryIds.contains(cat.foodCatId))
                     .toList();
 
-                if (selectedCategoryId == null &&
-                    filteredCategories.isNotEmpty) {
-                  selectedCategoryId = filteredCategories.first.foodCatId;
+                filteredCategories.sort((a, b) => a.foodCatSorting.compareTo(b.foodCatSorting));
+
+                if (_selectedCategoryIdInternal == null && filteredCategories.isNotEmpty) {
+                  _selectedCategoryIdInternal = filteredCategories.first.foodCatId;
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    widget.onCategorySelected(selectedCategoryId!);
+                    widget.onCategorySelected(_selectedCategoryIdInternal!);
                   });
                 }
 
-                if (maxButtonWidth == null && filteredCategories.isNotEmpty) {
+                if (_maxButtonWidth == null && filteredCategories.isNotEmpty) {
                   double maxWidth = 0;
                   for (var cat in filteredCategories) {
-                    double w = calculateTextWidth(cat.foodCatName, textStyle);
+                    double w = _calculateTextWidth(cat.foodCatName, textStyle);
                     if (w > maxWidth) maxWidth = w;
                   }
                   maxWidth += 40;
-                  maxButtonWidth = maxWidth;
+                  _maxButtonWidth = maxWidth;
                 }
 
                 return SizedBox(
@@ -121,19 +155,18 @@ class _CategoryFoodState extends State<CategoryFood> {
                     itemCount: filteredCategories.length,
                     itemBuilder: (context, index) {
                       final category = filteredCategories[index];
-                      final isSelected =
-                          selectedCategoryId == category.foodCatId;
+                      final isSelected = _selectedCategoryIdInternal == category.foodCatId;
 
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            selectedCategoryId = category.foodCatId;
+                            _selectedCategoryIdInternal = category.foodCatId;
                           });
                           widget.onCategorySelected(category.foodCatId);
-                          _scrollToIndex(index);
+                           _scrollToSelectedCategory();
                         },
                         child: Container(
-                          width: maxButtonWidth,
+                          width: _maxButtonWidth,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
                             color: isSelected

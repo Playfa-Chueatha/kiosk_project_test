@@ -6,7 +6,7 @@ import 'package:kiosk_project_test/data/Data_food.dart';
 import 'package:kiosk_project_test/widget/Food.dart';
 import 'package:kiosk_project_test/widget/food_set.dart';
 import 'package:kiosk_project_test/widget/SearchToggleWidget.dart';
-import 'package:kiosk_project_test/widget/cetagoryfood.dart';
+import 'package:kiosk_project_test/widget/cetagoryfood.dart'; // CategoryFood
 
 class LeftPanel extends StatefulWidget {
   final void Function(FoodData) onFoodSelected;
@@ -25,7 +25,8 @@ class _LeftPanelState extends State<LeftPanel> {
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
   String? _selectedFoodSetId;
-  String? _selectedFoodCatId;
+  String? _selectedFoodCatId; // หมวดหมู่ที่ถูกเลือกจาก CategoryFood
+  String? _currentVisibleFoodCatId; // หมวดหมู่ที่มองเห็นใน FoodListWidget (จากการ scroll)
 
   void _toggleSearch() {
     setState(() {
@@ -33,6 +34,26 @@ class _LeftPanelState extends State<LeftPanel> {
       if (!_showSearch) {
         _searchText = '';
         _searchController.clear();
+      }
+    });
+  }
+
+  void _handleCategorySelected(String categoryId) {
+    setState(() {
+      _selectedFoodCatId = categoryId;
+      // เมื่อผู้ใช้แตะ category ใน CategoryFood
+      // เราจะให้ FoodListWidget เลื่อนไปยัง category นั้น
+      // ไม่ต้องอัปเดต _currentVisibleFoodCatId ที่นี่ เพราะ FoodListWidget จะแจ้งกลับมาเอง
+    });
+  }
+
+  void _handleVisibleCategoryChanged(String categoryId) {
+    setState(() {
+      _currentVisibleFoodCatId = categoryId;
+      // อัปเดต _selectedFoodCatId เพื่อให้ CategoryFood ไฮไลท์ถูกต้อง
+      // เฉพาะเมื่อ _selectedFoodCatId ยังไม่ตรงกับหมวดหมู่ที่มองเห็นปัจจุบัน
+      if (_selectedFoodCatId != categoryId) {
+        _selectedFoodCatId = categoryId;
       }
     });
   }
@@ -102,8 +123,8 @@ class _LeftPanelState extends State<LeftPanel> {
                     print('ID: ${selectedFoodSet.foodSetId}');
                     setState(() {
                       _selectedFoodSetId = selectedFoodSet.foodSetId;
-                      _selectedFoodCatId =
-                          null; 
+                      _selectedFoodCatId = null; // รีเซ็ตเมื่อเปลี่ยน FoodSet
+                      _currentVisibleFoodCatId = null; // รีเซ็ตเมื่อเปลี่ยน FoodSet
                     });
                   },
                 ),
@@ -113,12 +134,8 @@ class _LeftPanelState extends State<LeftPanel> {
                   padding: const EdgeInsets.all(20),
                   child: CategoryFood(
                     selectedFoodSetId: _selectedFoodSetId!,
-                    onCategorySelected: (foodCatId) {
-                      print('เลือกหมวดหมู่: $foodCatId');
-                      setState(() {
-                        _selectedFoodCatId = foodCatId;
-                      });
-                    },
+                    onCategorySelected: _handleCategorySelected,
+                    currentVisibleCategoryId: _currentVisibleFoodCatId, // ส่งหมวดหมู่ที่มองเห็นไปให้ CategoryFood
                   ),
                 ),
               Expanded(
@@ -129,7 +146,8 @@ class _LeftPanelState extends State<LeftPanel> {
                     onFoodSelected: widget.onFoodSelected,
                     searchText: _searchText,
                     selectedFoodSetId: _selectedFoodSetId ?? '',
-                    selectedFoodCatId: _selectedFoodCatId,
+                    selectedFoodCatId: _selectedFoodCatId, // ส่งหมวดหมู่ที่ถูกเลือกจาก CategoryFood
+                    onCategoryChanged: _handleVisibleCategoryChanged, // รับ Callback จาก FoodListWidget
                   ),
                 ),
               ),

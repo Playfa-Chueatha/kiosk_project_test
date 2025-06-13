@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kiosk_project_test/Screen/Home.dart';
+import 'package:kiosk_project_test/bloc/bloc_VisibleCategory.dart';
 import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
-import 'package:kiosk_project_test/bloc/loc_food_data.dart';
+import 'package:kiosk_project_test/bloc/bloc_food_data.dart';
 import 'package:kiosk_project_test/bloc/bloc_nationalcetagoryfood.dart';
 
 void main() async {
@@ -33,17 +34,17 @@ class MyApp extends StatelessWidget {
           create: (context) => FoodCategoryBloc(),
         ),
         BlocProvider<FoodListBloc>(
-          create: (context) => FoodListBloc()..add(LoadFoodLsit()),
+          create: (context) => FoodListBloc()..add(LoadFoodList()),
         ),
+        BlocProvider<VisibleCategoryBloc>(
+          create: (context) => VisibleCategoryBloc()
+        ),
+        
       ],
-      child: MaterialApp(
+      child: const MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Kiosk Project Test',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
-          useMaterial3: true,
-        ),
-        home: const MyHomePage(),
+        home: MyHomePage(),
       ),
     );
   }
