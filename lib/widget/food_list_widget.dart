@@ -13,9 +13,18 @@ class FoodList extends StatefulWidget {
   final Function(FoodData) onFoodSelected;
   final String searchText, selectedFoodSetId;
   final String? selectedFoodCatId;
-  final Function(String)? onCategoryChanged, onVisibleCategoryChanged;
+  final Function(String)? onCategoryChanged;
+  final Function(String)? onVisibleCategoryChanged;
 
-  const FoodList({super.key, required this.onFoodSelected, required this.searchText, required this.selectedFoodSetId, this.selectedFoodCatId, this.onCategoryChanged, this.onVisibleCategoryChanged});
+  const FoodList({
+    super.key,
+    required this.onFoodSelected,
+    required this.searchText,
+    required this.selectedFoodSetId,
+    this.selectedFoodCatId,
+    this.onCategoryChanged,
+    this.onVisibleCategoryChanged,
+  });
 
   @override
   State<FoodList> createState() => _FoodListWidgetState();
@@ -25,6 +34,7 @@ class _FoodListWidgetState extends State<FoodList> {
   late final FoodListController _controller = FoodListController(
     itemPositionsListener: ItemPositionsListener.create(),
     onCategoryChanged: widget.onCategoryChanged,
+
   );
 
   @override
@@ -78,8 +88,6 @@ class _FoodListWidgetState extends State<FoodList> {
               widget.searchText,
               widget.selectedFoodSetId,
               categoryNameMap,
-              
-
             );
             _controller.updateCategoryOrderAndMap(sortedEntries);
 

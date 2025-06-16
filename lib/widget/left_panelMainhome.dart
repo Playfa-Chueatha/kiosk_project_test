@@ -1,4 +1,4 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, avoid_print
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -25,7 +25,14 @@ class _LeftPanelState extends State<LeftPanel> {
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
   String? _selectedFoodSetId;
-  String? _selectedFoodCatId;
+
+  // สถานะติดตามว่าผู้ใช้กดเลือก category หรือยัง
+  String? _userTappedCategoryId;
+  bool _hasUserTappedCategory = false;
+
+  // สถานะติดตามว่ามีการสกอลดู category ไหน
+  String? _foodListScrolledToCategoryId;
+  bool _hasFoodListScrolled = false;
 
   void _toggleSearch() {
     setState(() {
@@ -37,16 +44,20 @@ class _LeftPanelState extends State<LeftPanel> {
     });
   }
 
-  void _handleCategorySelected(String categoryId) {
-    setState(() {
-      _selectedFoodCatId = categoryId;
-    });
-  }
-
-  void _handleVisibleCategoryChanged(String categoryId) {
-    if (_selectedFoodCatId != categoryId) {
+  void _handleFoodListVisibleCategoryChanged(String categoryId) {
+    if (_userTappedCategoryId == null || _userTappedCategoryId == categoryId) {
+      if (_foodListScrolledToCategoryId != categoryId) {
+        setState(() {
+          _foodListScrolledToCategoryId = categoryId;
+          _hasFoodListScrolled = true;
+        });
+      }
+    } else {
       setState(() {
-        _selectedFoodCatId = categoryId;
+        _userTappedCategoryId = null;
+        _hasUserTappedCategory = false;
+        _foodListScrolledToCategoryId = categoryId;
+        _hasFoodListScrolled = true;
       });
     }
   }
@@ -114,8 +125,13 @@ class _LeftPanelState extends State<LeftPanel> {
                   onSelected: (selectedFoodSet) {
                     setState(() {
                       _selectedFoodSetId = selectedFoodSet.foodSetId;
-                      _selectedFoodCatId = null;
+                      _userTappedCategoryId = null;
+                      _hasUserTappedCategory = false;
+                      _foodListScrolledToCategoryId = null;
+                      _hasFoodListScrolled = false;
                     });
+                    print(
+                        'DEBUG: LeftPanel: Food Set Selected: $_selectedFoodSetId');
                   },
                 ),
               ),
@@ -124,21 +140,49 @@ class _LeftPanelState extends State<LeftPanel> {
                   padding: const EdgeInsets.all(20),
                   child: CategoryFood(
                     selectedFoodSetId: _selectedFoodSetId!,
-                    currentVisibleCategoryId: _selectedFoodCatId,
-                    onCategorySelected: _handleCategorySelected,
-                    onVisibleCategoryChanged: _handleVisibleCategoryChanged,
+                    onCategorySelected: (catId) {
+                      print(
+                          'CategoryFood: onCategorySelected (tap) with catId: $catId');
+                      setState(() {
+                        _userTappedCategoryId = catId;
+                        _hasUserTappedCategory = true;
+                        _foodListScrolledToCategoryId = null;
+                        _hasFoodListScrolled = false;
+                      });
+                    },
+                    currentVisibleCategoryId: _hasUserTappedCategory
+                        ? _userTappedCategoryId
+                        : (_hasFoodListScrolled
+                            ? _foodListScrolledToCategoryId
+                            : null),
+                    onVisibleCategoryChanged: (visibleCatId) {
+                      print(
+                          'CategoryFood: onVisibleCategoryChanged (scroll) with visibleCatId: $visibleCatId');
+                      if (!_hasUserTappedCategory) {
+                        _handleFoodListVisibleCategoryChanged(visibleCatId);
+                      }
+                    },
                   ),
                 ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(10),
                   child: FoodList(
-                    key: ValueKey('foodlist_${_searchText}_${_selectedFoodSetId ?? ''}'),
+                    key: ValueKey(
+                        'foodlist_${_searchText}_${_selectedFoodSetId ?? ''}'),
                     onFoodSelected: widget.onFoodSelected,
                     searchText: _searchText,
                     selectedFoodSetId: _selectedFoodSetId ?? '',
-                    selectedFoodCatId: _selectedFoodCatId,
-                    onCategoryChanged: _handleVisibleCategoryChanged, // This is for when FoodListWidget scrolls
+                    selectedFoodCatId: _hasUserTappedCategory
+                        ? _userTappedCategoryId
+                        : (_hasFoodListScrolled
+                            ? _foodListScrolledToCategoryId
+                            : null),
+                    onCategoryChanged: (catId) {
+                      if (!_hasUserTappedCategory) {
+                        _handleFoodListVisibleCategoryChanged(catId);
+                      }
+                    },
                   ),
                 ),
               ),

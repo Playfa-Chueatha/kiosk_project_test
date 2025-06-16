@@ -18,40 +18,27 @@ class FoodListController {
   ItemScrollController get scrollController => _scrollController;
   List<String> get orderCategory => _orderCategory;
 
-
   FoodListController({
     required this.itemPositionsListener,
     this.onCategoryChanged,
   });
 
   void init(BuildContext context) {
-   
+    itemPositionsListener.itemPositions.addListener(() => onScroll(context));
   }
 
-  void dispose() {
-    itemPositionsListener.itemPositions.removeListener(() {});
-  }
+  void dispose() {}
 
   void onScroll(BuildContext context) {
-    if (itemPositionsListener.itemPositions.value.isEmpty) {
-      print('DEBUG: ScrollablePositionedList: No visible items.');
-      return;
-    }
+    final positions = itemPositionsListener.itemPositions.value;
+    if (positions.isEmpty) return;
 
-    if (_orderCategory.isEmpty) {
-      print('DEBUG: _orderCategory is Empty. Cannot determine visible category.');
-      return;
-    }
+    if (_orderCategory.isEmpty) return;
 
-    final Iterable<ItemPosition> visibleItems =
-        itemPositionsListener.itemPositions.value.where((position) {
-      return position.itemLeadingEdge >= 0 && position.itemLeadingEdge < 1;
-    });
+    final visibleItems = positions.where((position) =>
+        position.itemLeadingEdge >= 0 && position.itemLeadingEdge < 1);
 
-    if (visibleItems.isEmpty) {
-      print('DEBUG: No fully visible items found.');
-      return;
-    }
+    if (visibleItems.isEmpty) return;
 
     final firstVisiblePosition = visibleItems.reduce((a, b) =>
         a.itemLeadingEdge < b.itemLeadingEdge ||
@@ -61,27 +48,26 @@ class FoodListController {
 
     final int visibleIndex = firstVisiblePosition.index;
 
-    print('DEBUG: Scroll Detected. First visible item index: $visibleIndex');
-    print('DEBUG: _orderCategory length: ${_orderCategory.length}');
-
     if (visibleIndex >= 0 && visibleIndex < _orderCategory.length) {
-      final String visibleCategoryId = _orderCategory[visibleIndex];
+      final visibleCategoryId = _orderCategory[visibleIndex];
+
+      print(
+          'Scrolling... visible index: $visibleIndex, visible categoryId: $visibleCategoryId');
+
+      
+      if (onCategoryChanged != null) {
+        print('Calling onCategoryChanged with $visibleCategoryId');
+        onCategoryChanged!(visibleCategoryId);
+      }
 
       final currentBlocState = context.read<VisibleCategoryBloc>().state;
 
       if (currentBlocState == null ||
           currentBlocState.visibleCategoryId != visibleCategoryId) {
-        print('DEBUG: Emitting UpdateVisibleCategory: $visibleCategoryId');
         context
             .read<VisibleCategoryBloc>()
             .add(UpdateVisibleCategory(visibleCategoryId));
-      } else {
-        print(
-            'DEBUG: Visible category $visibleCategoryId already active. No emit.');
       }
-    } else {
-      print(
-          'DEBUG: Index $visibleIndex out of bounds for _orderCategory (length ${_orderCategory.length}).');
     }
   }
 
@@ -94,11 +80,11 @@ class FoodListController {
     String searchText,
   ) {
     if (newSelectedFoodSetId != oldSelectedFoodSetId) {
-      
       final foodListState = context.read<FoodListBloc>().state;
       final foodCategoryState = context.read<FoodCategoryBloc>().state;
 
-      if (foodListState is FoodItemLoaded && foodCategoryState is FoodCategoryLoaded) {
+      if (foodListState is FoodItemLoaded &&
+          foodCategoryState is FoodCategoryLoaded) {
         Map<String, String> categoryNameMap = {
           for (var cat in foodCategoryState.categories)
             cat.foodCatId: cat.foodCatName
@@ -117,7 +103,8 @@ class FoodListController {
             ? filteredAndGroupedFood.first.key
             : null;
 
-        if (firstCategoryId != null && newSelectedFoodCatId != firstCategoryId) {
+        if (firstCategoryId != null &&
+            newSelectedFoodCatId != firstCategoryId) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _scrollToCategory(firstCategoryId);
             if (onCategoryChanged != null) {
@@ -139,8 +126,6 @@ class FoodListController {
 
     if (newSelectedFoodCatId != null &&
         newSelectedFoodCatId != oldSelectedFoodCatId) {
-      print(
-          'DEBUG: Selected category ID changed to $newSelectedFoodCatId. Scrolling...');
       Future.delayed(const Duration(milliseconds: 100), () {
         _scrollToCategory(newSelectedFoodCatId);
       });
@@ -150,15 +135,11 @@ class FoodListController {
   void _scrollToCategory(String categoryId) {
     final index = _categoryIndexMap[categoryId];
     if (index != null) {
-      print('DEBUG: Scrolling to category $categoryId at index $index');
       _scrollController.scrollTo(
         index: index,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
-    } else {
-      print(
-          'DEBUG: No index found for categoryId: $categoryId in _categoryIndexMap. _categoryIndexMap: $_categoryIndexMap');
     }
   }
 
