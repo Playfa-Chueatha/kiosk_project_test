@@ -3,8 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
 import 'package:kiosk_project_test/bloc/bloc_food_data.dart';
 import 'package:kiosk_project_test/data/Data_food.dart';
-import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
-import 'package:kiosk_project_test/bloc/bloc_VisibleCategory.dart';
 
 class CategoryFood extends StatefulWidget {
   final String selectedFoodSetId;
@@ -30,64 +28,6 @@ class _CategoryFoodState extends State<CategoryFood> {
   List<FoodData> currentFoodList = [];
 
   final ScrollController _scrollController = ScrollController();
-  final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create();
-
-  void _onScrollChanged() {
-    final positions = itemPositionsListener.itemPositions.value;
-
-    if (positions.isNotEmpty && currentFoodList.isNotEmpty) {
-      final firstVisible = positions
-          .where((p) => p.itemLeadingEdge >= 0)
-          .reduce((a, b) => a.itemLeadingEdge < b.itemLeadingEdge ? a : b);
-
-      final index = firstVisible.index;
-
-      if (index < currentFoodList.length) {
-        final foodItem = currentFoodList[index];
-        final currentVisibleCategoryId = foodItem.foodCatId;
-
-        context.read<VisibleCategoryBloc>().add(UpdateVisibleCategory(currentVisibleCategoryId));
-      }
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    itemPositionsListener.itemPositions.addListener(_onScrollChanged);
-    context.read<FoodCategoryBloc>().add(LoadFoodCategories());
-    context.read<FoodListBloc>().add(LoadFoodList());
-  }
-
-  @override
-  void didUpdateWidget(covariant CategoryFood oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.selectedFoodSetId != oldWidget.selectedFoodSetId) {
-      setState(() {
-        _selectedCategoryIdInternal = null;
-        _maxButtonWidth = null;
-      });
-    }
-
-    if (widget.currentVisibleCategoryId != oldWidget.currentVisibleCategoryId &&
-        widget.currentVisibleCategoryId != null) {
-      setState(() {
-        _selectedCategoryIdInternal = widget.currentVisibleCategoryId;
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToSelectedCategory();
-      });
-    }
-  }
-
-  double _calculateTextWidth(String text, TextStyle style) {
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      maxLines: 1,
-      textDirection: TextDirection.ltr,
-    )..layout(minWidth: 0, maxWidth: double.infinity);
-    return textPainter.size.width;
-  }
 
   void _scrollToSelectedCategory() {
     if (_maxButtonWidth == null || _selectedCategoryIdInternal == null) return;
@@ -108,11 +48,9 @@ class _CategoryFoodState extends State<CategoryFood> {
         .where((cat) => usedCategoryIds.contains(cat.foodCatId))
         .toList();
 
-    filteredCategories
-        .sort((a, b) => a.foodCatSorting.compareTo(b.foodCatSorting));
+    filteredCategories.sort((a, b) => a.foodCatSorting.compareTo(b.foodCatSorting));
 
-    final selectedIndex = filteredCategories
-        .indexWhere((cat) => cat.foodCatId == _selectedCategoryIdInternal);
+    final selectedIndex = filteredCategories.indexWhere((cat) => cat.foodCatId == _selectedCategoryIdInternal);
 
     if (selectedIndex != -1) {
       final targetOffset = selectedIndex * _maxButtonWidth!;
@@ -121,6 +59,45 @@ class _CategoryFoodState extends State<CategoryFood> {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+    }
+  }
+
+  double _calculateTextWidth(String text, TextStyle style) {
+    final TextPainter textPainter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    )..layout(minWidth: 0, maxWidth: double.infinity);
+    return textPainter.size.width;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    BlocProvider.of<FoodCategoryBloc>(context).add(LoadFoodCategories());
+    BlocProvider.of<FoodListBloc>(context).add(LoadFoodList());
+  }
+
+  @override
+  void didUpdateWidget(covariant CategoryFood oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.selectedFoodSetId != oldWidget.selectedFoodSetId) {
+      setState(() {
+        _selectedCategoryIdInternal = null;
+        _maxButtonWidth = null;
+      });
+    }
+
+    if (widget.currentVisibleCategoryId != oldWidget.currentVisibleCategoryId &&
+        widget.currentVisibleCategoryId != null) {
+      setState(() {
+        _selectedCategoryIdInternal = widget.currentVisibleCategoryId;
+      });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToSelectedCategory();
+      });
     }
   }
 
@@ -139,94 +116,96 @@ class _CategoryFoodState extends State<CategoryFood> {
 
     return BlocBuilder<FoodListBloc, FoodSetState>(
       builder: (context, foodState) {
-        if (foodState is FoodItemLoaded) {
-          final allFood = foodState.foodItem;
+        if (foodState is! FoodItemLoaded) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          final filteredFood = allFood
-              .where((food) => food.foodSetId == widget.selectedFoodSetId)
-              .toList();
-          currentFoodList = filteredFood;
-          final usedCategoryIds =
-              filteredFood.map((food) => food.foodCatId).toSet();
+        final allFood = foodState.foodItem;
 
-          return BlocBuilder<FoodCategoryBloc, FoodCategoryState>(
-            builder: (context, state) {
-              if (state is FoodCategoryLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is FoodCategoryLoaded) {
-                final filteredCategories = state.categories
-                    .where((cat) => usedCategoryIds.contains(cat.foodCatId))
-                    .toList();
+        final filteredFood = allFood
+            .where((food) => food.foodSetId == widget.selectedFoodSetId)
+            .toList();
 
-                filteredCategories.sort(
-                    (a, b) => a.foodCatSorting.compareTo(b.foodCatSorting));
+        currentFoodList = filteredFood;
 
-                if (_selectedCategoryIdInternal == null &&
-                    filteredCategories.isNotEmpty) {
-                  _selectedCategoryIdInternal =
-                      filteredCategories.first.foodCatId;
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    widget.onCategorySelected(_selectedCategoryIdInternal!);
-                  });
+        final usedCategoryIds = filteredFood.map((food) => food.foodCatId).toSet();
+
+        return BlocBuilder<FoodCategoryBloc, FoodCategoryState>(
+          builder: (context, state) {
+            if (state is FoodCategoryLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is FoodCategoryLoaded) {
+              final filteredCategories = state.categories
+                  .where((cat) => usedCategoryIds.contains(cat.foodCatId))
+                  .toList();
+
+              filteredCategories.sort((a, b) => a.foodCatName.compareTo(b.foodCatName));
+
+              if (_selectedCategoryIdInternal == null && filteredCategories.isNotEmpty) {
+                _selectedCategoryIdInternal = filteredCategories.first.foodCatId;
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  widget.onCategorySelected(_selectedCategoryIdInternal!);
+                });
+              }
+
+              if (_maxButtonWidth == null && filteredCategories.isNotEmpty) {
+                double maxWidth = 0;
+                for (var cat in filteredCategories) {
+                  double w = _calculateTextWidth(cat.foodCatName, textStyle);
+                  if (w > maxWidth) maxWidth = w;
                 }
+                _maxButtonWidth = maxWidth + 40;
+              }
 
-                if (_maxButtonWidth == null && filteredCategories.isNotEmpty) {
-                  double maxWidth = 0;
-                  for (var cat in filteredCategories) {
-                    double w = _calculateTextWidth(cat.foodCatName, textStyle);
-                    if (w > maxWidth) maxWidth = w;
-                  }
-                  maxWidth += 40;
-                  _maxButtonWidth = maxWidth;
-                }
+              return SizedBox(
+                height: listViewHeight,
+                child: NotificationListener<ScrollNotification>(
+                  onNotification: (scrollNotification) {
+                    if (scrollNotification is ScrollUpdateNotification) {
+                      if (_maxButtonWidth != null && currentFoodList.isNotEmpty) {
+                        final offset = _scrollController.offset;
+                        final index = (offset / _maxButtonWidth!).floor().clamp(0, currentFoodList.length - 1);
+                        final visibleCategoryId = currentFoodList[index].foodCatId;
 
-                return SizedBox(
-                  height: listViewHeight,
+                        if (visibleCategoryId != widget.currentVisibleCategoryId) {
+                          widget.onVisibleCategoryChanged(visibleCategoryId);
+                        }
+                      }
+                    }
+                    return false;
+                  },
                   child: ListView.builder(
                     controller: _scrollController,
                     scrollDirection: Axis.horizontal,
                     itemCount: filteredCategories.length,
                     itemBuilder: (context, index) {
                       final category = filteredCategories[index];
-                      final isSelected =
-                          _selectedCategoryIdInternal == category.foodCatId;
+                      final isSelected = _selectedCategoryIdInternal == category.foodCatId;
+
+                      final borderRadius = BorderRadius.only(
+                        topLeft: Radius.circular(index == 0 ? 12 : (isSelected ? 12 : 0)),
+                        bottomLeft: Radius.circular(index == 0 ? 12 : (isSelected ? 12 : 0)),
+                        topRight: Radius.circular(index == filteredCategories.length - 1 ? 12 : (isSelected ? 12 : 0)),
+                        bottomRight: Radius.circular(index == filteredCategories.length - 1 ? 12 : (isSelected ? 12 : 0)),
+                      );
 
                       return GestureDetector(
                         onTap: () {
-                          setState(() {
-                            _selectedCategoryIdInternal = category.foodCatId;
-                          });
+                          setState(() => _selectedCategoryIdInternal = category.foodCatId);
                           widget.onCategorySelected(category.foodCatId);
                           _scrollToSelectedCategory();
                         },
                         child: Container(
                           width: _maxButtonWidth,
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? const Color(0xFF02CCFE)
-                                : const Color(0xFFF6F6F6),
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(
-                                  index == 0 ? 12 : (isSelected ? 12 : 0)),
-                              bottomLeft: Radius.circular(
-                                  index == 0 ? 12 : (isSelected ? 12 : 0)),
-                              topRight: Radius.circular(
-                                  index == filteredCategories.length - 1
-                                      ? 12
-                                      : (isSelected ? 12 : 0)),
-                              bottomRight: Radius.circular(
-                                  index == filteredCategories.length - 1
-                                      ? 12
-                                      : (isSelected ? 12 : 0)),
-                            ),
-                          ),
                           alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isSelected ? const Color(0xFF02CCFE) : const Color(0xFFF6F6F6),
+                            borderRadius: borderRadius,
+                          ),
                           child: Text(
                             category.foodCatName,
-                            style: textStyle.copyWith(
-                              color: isSelected ? Colors.white : Colors.black87,
-                            ),
+                            style: textStyle.copyWith(color: isSelected ? Colors.white : Colors.black87),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             textAlign: TextAlign.center,
@@ -235,17 +214,15 @@ class _CategoryFoodState extends State<CategoryFood> {
                       );
                     },
                   ),
-                );
-              } else if (state is FoodCategoryError) {
-                return Center(child: Text('เกิดข้อผิดพลาด: ${state.message}'));
-              } else {
-                return const Center(child: Text('ไม่มีข้อมูล'));
-              }
-            },
-          );
-        } else {
-          return const Center(child: CircularProgressIndicator());
-        }
+                ),
+              );
+            } else if (state is FoodCategoryError) {
+              return Center(child: Text('เกิดข้อผิดพลาด: ${state.message}'));
+            } else {
+              return const Center(child: Text('ไม่มีข้อมูล'));
+            }
+          },
+        );
       },
     );
   }

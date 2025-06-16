@@ -69,8 +69,8 @@ class _NationalFoodCategoryState extends State<NationalFoodCategory> {
             }
           }
 
-          const double buttonHorizontalPadding = 40.0 * 2; // ซ้าย-ขวา padding ปุ่ม
-          const double buttonPaddingAround = 5.0 * 2; // margin ปุ่ม
+          const double buttonHorizontalPadding = 40.0 * 2; 
+          const double buttonPaddingAround = 5.0 * 2;
 
           final double minimumButtonWidth =
               maxTextWidth + buttonHorizontalPadding + buttonPaddingAround;

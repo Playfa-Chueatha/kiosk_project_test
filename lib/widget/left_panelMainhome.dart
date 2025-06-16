@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:kiosk_project_test/data/Data_food.dart';
-import 'package:kiosk_project_test/widget/Food.dart';
+import 'package:kiosk_project_test/widget/food_list_widget.dart';
 import 'package:kiosk_project_test/widget/food_set.dart';
 import 'package:kiosk_project_test/widget/SearchToggleWidget.dart';
 import 'package:kiosk_project_test/widget/cetagoryfood.dart';
@@ -132,13 +132,13 @@ class _LeftPanelState extends State<LeftPanel> {
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.all(10),
-                  child: FoodListWidget(
-                    key: ValueKey(_searchText + (_selectedFoodSetId ?? '')),
+                  child: FoodList(
+                    key: ValueKey('foodlist_${_searchText}_${_selectedFoodSetId ?? ''}'),
                     onFoodSelected: widget.onFoodSelected,
                     searchText: _searchText,
                     selectedFoodSetId: _selectedFoodSetId ?? '',
                     selectedFoodCatId: _selectedFoodCatId,
-                    onCategoryChanged: _handleVisibleCategoryChanged,
+                    onCategoryChanged: _handleVisibleCategoryChanged, // This is for when FoodListWidget scrolls
                   ),
                 ),
               ),
