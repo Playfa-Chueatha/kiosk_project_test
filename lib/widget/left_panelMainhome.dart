@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, avoid_print
+// ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -6,7 +6,7 @@ import 'package:kiosk_project_test/data/Data_food.dart';
 import 'package:kiosk_project_test/widget/Food.dart';
 import 'package:kiosk_project_test/widget/food_set.dart';
 import 'package:kiosk_project_test/widget/SearchToggleWidget.dart';
-import 'package:kiosk_project_test/widget/cetagoryfood.dart'; // CategoryFood
+import 'package:kiosk_project_test/widget/cetagoryfood.dart';
 
 class LeftPanel extends StatefulWidget {
   final void Function(FoodData) onFoodSelected;
@@ -25,8 +25,7 @@ class _LeftPanelState extends State<LeftPanel> {
   final TextEditingController _searchController = TextEditingController();
   String _searchText = '';
   String? _selectedFoodSetId;
-  String? _selectedFoodCatId; // หมวดหมู่ที่ถูกเลือกจาก CategoryFood
-  String? _currentVisibleFoodCatId; // หมวดหมู่ที่มองเห็นใน FoodListWidget (จากการ scroll)
+  String? _selectedFoodCatId;
 
   void _toggleSearch() {
     setState(() {
@@ -41,21 +40,15 @@ class _LeftPanelState extends State<LeftPanel> {
   void _handleCategorySelected(String categoryId) {
     setState(() {
       _selectedFoodCatId = categoryId;
-      // เมื่อผู้ใช้แตะ category ใน CategoryFood
-      // เราจะให้ FoodListWidget เลื่อนไปยัง category นั้น
-      // ไม่ต้องอัปเดต _currentVisibleFoodCatId ที่นี่ เพราะ FoodListWidget จะแจ้งกลับมาเอง
     });
   }
 
   void _handleVisibleCategoryChanged(String categoryId) {
-    setState(() {
-      _currentVisibleFoodCatId = categoryId;
-      // อัปเดต _selectedFoodCatId เพื่อให้ CategoryFood ไฮไลท์ถูกต้อง
-      // เฉพาะเมื่อ _selectedFoodCatId ยังไม่ตรงกับหมวดหมู่ที่มองเห็นปัจจุบัน
-      if (_selectedFoodCatId != categoryId) {
+    if (_selectedFoodCatId != categoryId) {
+      setState(() {
         _selectedFoodCatId = categoryId;
-      }
-    });
+      });
+    }
   }
 
   @override
@@ -80,7 +73,7 @@ class _LeftPanelState extends State<LeftPanel> {
             children: [
               SizedBox(height: screenHeight * 0.0),
               Padding(
-                padding: const EdgeInsets.fromLTRB(20,10,20,10),
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -116,15 +109,12 @@ class _LeftPanelState extends State<LeftPanel> {
               ),
               const SizedBox(height: 10),
               Padding(
-                padding: const EdgeInsets.fromLTRB(20,10,20,10),
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
                 child: NationalFoodCategory(
                   onSelected: (selectedFoodSet) {
-                    print('หมวด: ${selectedFoodSet.foodSetName}');
-                    print('ID: ${selectedFoodSet.foodSetId}');
                     setState(() {
                       _selectedFoodSetId = selectedFoodSet.foodSetId;
-                      _selectedFoodCatId = null; // รีเซ็ตเมื่อเปลี่ยน FoodSet
-                      _currentVisibleFoodCatId = null; // รีเซ็ตเมื่อเปลี่ยน FoodSet
+                      _selectedFoodCatId = null;
                     });
                   },
                 ),
@@ -134,8 +124,9 @@ class _LeftPanelState extends State<LeftPanel> {
                   padding: const EdgeInsets.all(20),
                   child: CategoryFood(
                     selectedFoodSetId: _selectedFoodSetId!,
+                    currentVisibleCategoryId: _selectedFoodCatId,
                     onCategorySelected: _handleCategorySelected,
-                    currentVisibleCategoryId: _currentVisibleFoodCatId, // ส่งหมวดหมู่ที่มองเห็นไปให้ CategoryFood
+                    onVisibleCategoryChanged: _handleVisibleCategoryChanged,
                   ),
                 ),
               Expanded(
@@ -146,8 +137,8 @@ class _LeftPanelState extends State<LeftPanel> {
                     onFoodSelected: widget.onFoodSelected,
                     searchText: _searchText,
                     selectedFoodSetId: _selectedFoodSetId ?? '',
-                    selectedFoodCatId: _selectedFoodCatId, // ส่งหมวดหมู่ที่ถูกเลือกจาก CategoryFood
-                    onCategoryChanged: _handleVisibleCategoryChanged, // รับ Callback จาก FoodListWidget
+                    selectedFoodCatId: _selectedFoodCatId,
+                    onCategoryChanged: _handleVisibleCategoryChanged,
                   ),
                 ),
               ),

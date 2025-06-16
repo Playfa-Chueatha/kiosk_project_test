@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
-import 'package:kiosk_project_test/bloc/bloc_food_data.dart'; // FoodCategoryBloc
-
+import 'package:kiosk_project_test/bloc/bloc_food_data.dart';
+import 'package:kiosk_project_test/data/Data_food.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:kiosk_project_test/bloc/bloc_VisibleCategory.dart';
 
 class CategoryFood extends StatefulWidget {
   final String selectedFoodSetId;
   final ValueChanged<String> onCategorySelected;
   final String? currentVisibleCategoryId;
+  final ValueChanged<String> onVisibleCategoryChanged;
 
   const CategoryFood({
     super.key,
     required this.selectedFoodSetId,
     required this.onCategorySelected,
     this.currentVisibleCategoryId,
+    required this.onVisibleCategoryChanged,
   });
 
   @override
@@ -23,13 +27,36 @@ class CategoryFood extends StatefulWidget {
 class _CategoryFoodState extends State<CategoryFood> {
   String? _selectedCategoryIdInternal;
   double? _maxButtonWidth;
+  List<FoodData> currentFoodList = [];
+
   final ScrollController _scrollController = ScrollController();
+  final ItemPositionsListener itemPositionsListener = ItemPositionsListener.create();
+
+  void _onScrollChanged() {
+    final positions = itemPositionsListener.itemPositions.value;
+
+    if (positions.isNotEmpty && currentFoodList.isNotEmpty) {
+      final firstVisible = positions
+          .where((p) => p.itemLeadingEdge >= 0)
+          .reduce((a, b) => a.itemLeadingEdge < b.itemLeadingEdge ? a : b);
+
+      final index = firstVisible.index;
+
+      if (index < currentFoodList.length) {
+        final foodItem = currentFoodList[index];
+        final currentVisibleCategoryId = foodItem.foodCatId;
+
+        context.read<VisibleCategoryBloc>().add(UpdateVisibleCategory(currentVisibleCategoryId));
+      }
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<FoodCategoryBloc>(context).add(LoadFoodCategories());
-    BlocProvider.of<FoodListBloc>(context).add(LoadFoodList());
+    itemPositionsListener.itemPositions.addListener(_onScrollChanged);
+    context.read<FoodCategoryBloc>().add(LoadFoodCategories());
+    context.read<FoodListBloc>().add(LoadFoodList());
   }
 
   @override
@@ -42,7 +69,8 @@ class _CategoryFoodState extends State<CategoryFood> {
       });
     }
 
-    if (widget.currentVisibleCategoryId != oldWidget.currentVisibleCategoryId && widget.currentVisibleCategoryId != null) {
+    if (widget.currentVisibleCategoryId != oldWidget.currentVisibleCategoryId &&
+        widget.currentVisibleCategoryId != null) {
       setState(() {
         _selectedCategoryIdInternal = widget.currentVisibleCategoryId;
       });
@@ -80,9 +108,11 @@ class _CategoryFoodState extends State<CategoryFood> {
         .where((cat) => usedCategoryIds.contains(cat.foodCatId))
         .toList();
 
-    filteredCategories.sort((a, b) => a.foodCatSorting.compareTo(b.foodCatSorting));
+    filteredCategories
+        .sort((a, b) => a.foodCatSorting.compareTo(b.foodCatSorting));
 
-    final selectedIndex = filteredCategories.indexWhere((cat) => cat.foodCatId == _selectedCategoryIdInternal);
+    final selectedIndex = filteredCategories
+        .indexWhere((cat) => cat.foodCatId == _selectedCategoryIdInternal);
 
     if (selectedIndex != -1) {
       final targetOffset = selectedIndex * _maxButtonWidth!;
@@ -115,7 +145,7 @@ class _CategoryFoodState extends State<CategoryFood> {
           final filteredFood = allFood
               .where((food) => food.foodSetId == widget.selectedFoodSetId)
               .toList();
-
+          currentFoodList = filteredFood;
           final usedCategoryIds =
               filteredFood.map((food) => food.foodCatId).toSet();
 
@@ -128,10 +158,13 @@ class _CategoryFoodState extends State<CategoryFood> {
                     .where((cat) => usedCategoryIds.contains(cat.foodCatId))
                     .toList();
 
-                filteredCategories.sort((a, b) => a.foodCatSorting.compareTo(b.foodCatSorting));
+                filteredCategories.sort(
+                    (a, b) => a.foodCatSorting.compareTo(b.foodCatSorting));
 
-                if (_selectedCategoryIdInternal == null && filteredCategories.isNotEmpty) {
-                  _selectedCategoryIdInternal = filteredCategories.first.foodCatId;
+                if (_selectedCategoryIdInternal == null &&
+                    filteredCategories.isNotEmpty) {
+                  _selectedCategoryIdInternal =
+                      filteredCategories.first.foodCatId;
                   WidgetsBinding.instance.addPostFrameCallback((_) {
                     widget.onCategorySelected(_selectedCategoryIdInternal!);
                   });
@@ -155,7 +188,8 @@ class _CategoryFoodState extends State<CategoryFood> {
                     itemCount: filteredCategories.length,
                     itemBuilder: (context, index) {
                       final category = filteredCategories[index];
-                      final isSelected = _selectedCategoryIdInternal == category.foodCatId;
+                      final isSelected =
+                          _selectedCategoryIdInternal == category.foodCatId;
 
                       return GestureDetector(
                         onTap: () {
@@ -163,7 +197,7 @@ class _CategoryFoodState extends State<CategoryFood> {
                             _selectedCategoryIdInternal = category.foodCatId;
                           });
                           widget.onCategorySelected(category.foodCatId);
-                           _scrollToSelectedCategory();
+                          _scrollToSelectedCategory();
                         },
                         child: Container(
                           width: _maxButtonWidth,

@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -19,6 +21,7 @@ abstract class VisibleCategoryEvent extends Equatable {
 class UpdateVisibleCategory extends VisibleCategoryEvent {
   final String categoryId;
   const UpdateVisibleCategory(this.categoryId);
+  
 
   @override
   List<Object?> get props => [categoryId];

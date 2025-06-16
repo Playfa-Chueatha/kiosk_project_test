@@ -36,7 +36,7 @@ class SearchToggleWidget extends StatelessWidget {
                   isDense: true,
                   contentPadding: const EdgeInsets.all(10),
                   filled: true,  
-                  fillColor: Colors.grey[300],
+                  fillColor: const Color(0xFFF6F6F6),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide.none,

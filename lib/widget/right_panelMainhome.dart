@@ -33,8 +33,8 @@ class _RightPanelState extends State<RightPanel> {
     double fontsizequantity = screenWidth * 0.01;
     double fontsizefoodDesc = screenWidth * 0.008;
     double fontsizesubtotal = screenWidth * 0.015;
-    double fontsizeConfirmorder = screenWidth * 0.014;
-    final buttonSizequantity = screenWidth * 0.02;
+    double fontsizeConfirmorder = screenWidth * 0.01;
+    final buttonSizequantity = screenWidth * 0.01;
     final buttonSizeIconquantity = screenWidth * 0.01;
 
     return Container(
@@ -135,7 +135,7 @@ class _RightPanelState extends State<RightPanel> {
                                   fontSize: fontsizefoodDesc,
                                   color: Colors.grey),
                             ),
-                            const SizedBox(height: 8),
+                            SizedBox(height: screenHeight *0.008),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -148,6 +148,7 @@ class _RightPanelState extends State<RightPanel> {
                                   ),
                                 ),
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
                                   children: [
                                     RawMaterialButton(
                                       onPressed: () =>
@@ -156,19 +157,19 @@ class _RightPanelState extends State<RightPanel> {
                                       fillColor: Colors.grey[300],
                                       constraints: BoxConstraints.tightFor(
                                           width: buttonSizequantity,
-                                          height: 26),
+                                      ),
                                       elevation: 0,
                                       child: Icon(Icons.remove,
                                           color: Colors.black,
                                           size: buttonSizeIconquantity),
                                     ),
-                                    SizedBox(width: screenWidth * 0.004),
+                                    
                                     Text(
                                       food.quantity.toString().padLeft(2, '0'),
                                       style:
                                           TextStyle(fontSize: fontsizequantity),
                                     ),
-                                    SizedBox(width: screenWidth * 0.004),
+                                    
                                     RawMaterialButton(
                                       onPressed: () =>
                                           widget.onIncrease(food.foodId),
@@ -176,7 +177,7 @@ class _RightPanelState extends State<RightPanel> {
                                       fillColor: Colors.grey[300],
                                       constraints: BoxConstraints.tightFor(
                                           width: buttonSizequantity,
-                                          height: 26),
+                                      ),
                                       elevation: 0,
                                       child: Icon(Icons.add,
                                           color: Colors.black,
@@ -233,7 +234,7 @@ class _RightPanelState extends State<RightPanel> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextButton.icon(
-                onPressed: widget.selectedFoods.isEmpty ? null : () {},
+                onPressed: () {},
                 icon: const Icon(Icons.shopping_cart, color: Colors.white),
                 label: Text(
                   'Confirm Order (${widget.selectedFoods.length})',

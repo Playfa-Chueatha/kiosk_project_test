@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kiosk_project_test/bloc/bloc_VisibleCategory.dart';
 import 'package:kiosk_project_test/bloc/bloc_food_data.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
@@ -33,6 +34,64 @@ class _FoodListWidgetState extends State<FoodListWidget> {
   final ItemPositionsListener _itemPositionsListener =
       ItemPositionsListener.create();
   final Map<String, int> _categoryIndexMap = {};
+  String? currentVisibleCategoryId;
+  final List<String> _orderCategory = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _itemPositionsListener.itemPositions.addListener(_onScroll);
+    context.read<FoodListBloc>().add(LoadFoodList());
+    
+  }
+
+  @override
+  void dispose() {
+    _itemPositionsListener.itemPositions.removeListener(_onScroll);
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_itemPositionsListener.itemPositions.value.isEmpty) {
+      print('DEBUG: ScrollablePositionedList: No visible items.');
+      return;
+    }
+
+    if (_orderCategory.isEmpty) {
+      print('DEBUG: _orderCategory is Empty');
+      return;
+    }
+
+    final firstVisiblePosition = _itemPositionsListener.itemPositions.value.first;
+    final int visibleIndex = firstVisiblePosition.index;
+
+    print('DEBUG: Scroll Detected. First visible item index: $visibleIndex');
+    print('DEBUG: _orderedCategoryIds length: ${_orderCategory.length}');
+
+    if (visibleIndex >= 0 && visibleIndex < _orderCategory.length) {
+      final String visibleCategoryId = _orderCategory[visibleIndex];
+
+      final currentBlocState = context.read<VisibleCategoryBloc>().state;
+
+      if (currentBlocState == null ||
+          currentBlocState.visibleCategoryId != visibleCategoryId) {
+        print('DEBUG: Emitting UpdateVisibleCategory: $visibleCategoryId');
+        context
+            .read<VisibleCategoryBloc>()
+            .add(UpdateVisibleCategory(visibleCategoryId));
+
+        if (widget.onVisibleCategoryChanged != null) {
+          widget.onVisibleCategoryChanged!(visibleCategoryId);
+        }
+      } else {
+        print(
+            'DEBUG: Visible category $visibleCategoryId already active. No emit.');
+      }
+    } else {
+      print(
+          'DEBUG: Index $visibleIndex out of bounds for _orderedCategoryIds (length ${_orderCategory.length}).');
+    }
+  }
 
   @override
   void didUpdateWidget(FoodListWidget oldWidget) {
@@ -42,24 +101,30 @@ class _FoodListWidgetState extends State<FoodListWidget> {
 
     if (widget.selectedFoodSetId != oldWidget.selectedFoodSetId) {
       if (foodListState is FoodItemLoaded) {
-        final filteredFood = foodListState.foodItem.where((food) {
-          final matchSearch = widget.searchText.isEmpty ||
-              food.foodName
-                  .toLowerCase()
-                  .contains(widget.searchText.toLowerCase());
-          final matchSetId = widget.selectedFoodSetId.isEmpty ||
-              food.foodSetId == widget.selectedFoodSetId;
-          return matchSearch && matchSetId;
-        }).toList();
+        final foodCategoryState = context.read<FoodCategoryBloc>().state;
+        Map<String, String> categoryNameMap = {};
+        if (foodCategoryState is FoodCategoryLoaded) {
+          categoryNameMap = {
+            for (var cat in foodCategoryState.categories)
+              cat.foodCatId: cat.foodCatName
+          };
+        }
 
-        final firstCategoryId =
-            filteredFood.isNotEmpty ? filteredFood.first.foodCatId : null;
+        final filteredAndGroupedFood = _filterAndGroupFood(
+          foodListState.foodItem,
+          widget.searchText,
+          widget.selectedFoodSetId,
+          categoryNameMap,
+        );
+
+        final firstCategoryId = filteredAndGroupedFood.isNotEmpty
+            ? filteredAndGroupedFood.first.key
+            : null;
 
         if (firstCategoryId != null &&
             widget.selectedFoodCatId != firstCategoryId) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _scrollToCategory(firstCategoryId);
-
             if (widget.onCategoryChanged != null) {
               widget.onCategoryChanged!(firstCategoryId);
             }
@@ -70,6 +135,8 @@ class _FoodListWidgetState extends State<FoodListWidget> {
 
     if (widget.selectedFoodCatId != null &&
         widget.selectedFoodCatId != oldWidget.selectedFoodCatId) {
+      print(
+          'DEBUG: Selected category ID changed to ${widget.selectedFoodCatId}. Scrolling...');
       Future.delayed(const Duration(milliseconds: 300), () {
         _scrollToCategory(widget.selectedFoodCatId!);
       });
@@ -79,14 +146,48 @@ class _FoodListWidgetState extends State<FoodListWidget> {
   void _scrollToCategory(String categoryId) {
     final index = _categoryIndexMap[categoryId];
     if (index != null) {
+      print('DEBUG: Scrolling to category $categoryId at index $index');
       _scrollController.scrollTo(
         index: index,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
       );
     } else {
-      print('ไม่พบ index สำหรับ categoryId: $categoryId');
+      print(
+          'DEBUG: No index found for categoryId: $categoryId in _categoryIndexMap.');
     }
+  }
+
+  List<MapEntry<String, List<FoodData>>> _filterAndGroupFood(
+    List<FoodData> foodItems,
+    String searchText,
+    String selectedFoodSetId,
+    Map<String, String> categoryNameMap,
+  ) {
+    final filteredFood = foodItems.where((food) {
+      final matchSearch = searchText.isEmpty ||
+          food.foodName.toLowerCase().contains(searchText.toLowerCase());
+      final matchSetId =
+          selectedFoodSetId.isEmpty || food.foodSetId == selectedFoodSetId;
+      return matchSearch && matchSetId;
+    }).toList();
+
+    final Map<String, List<FoodData>> groupedFood = {};
+    for (var food in filteredFood) {
+      groupedFood.putIfAbsent(food.foodCatId, () => []).add(food);
+    }
+
+    final sortedEntries = groupedFood.entries.toList()
+      ..sort((a, b) {
+        final nameA = categoryNameMap[a.key] ?? 'Other';
+        final nameB = categoryNameMap[b.key] ?? 'Other';
+
+        if (nameA == 'Other' && nameB == 'Other') return 0;
+        if (nameA == 'Other') return 1;
+        if (nameB == 'Other') return -1;
+        return nameA.compareTo(nameB);
+      });
+    return sortedEntries;
   }
 
   @override
@@ -124,12 +225,12 @@ class _FoodListWidgetState extends State<FoodListWidget> {
 
                 final sortedEntries = groupedFood.entries.toList()
                   ..sort((a, b) {
-                    final nameA = categoryNameMap[a.key] ?? 'Unknown';
-                    final nameB = categoryNameMap[b.key] ?? 'Unknown';
+                    final nameA = categoryNameMap[a.key] ?? 'Orther';
+                    final nameB = categoryNameMap[b.key] ?? 'Orther';
 
-                    if (nameA == 'Unknown' && nameB == 'Unknown') return 0;
-                    if (nameA == 'Unknown') return 1;
-                    if (nameB == 'Unknown') return -1;
+                    if (nameA == 'Orther' && nameB == 'Orther') return 0;
+                    if (nameA == 'Orther') return 1;
+                    if (nameB == 'Orther') return -1;
                     return nameA.compareTo(nameB);
                   });
 
@@ -144,8 +245,7 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                   itemBuilder: (context, index) {
                     final entry = sortedEntries[index];
                     final categoryId = entry.key;
-                    final categoryName =
-                        categoryNameMap[categoryId] ?? 'Unknown';
+                    final categoryName = categoryNameMap[categoryId] ?? 'Other';
                     final items = entry.value;
 
                     return Column(
@@ -215,21 +315,22 @@ class _FoodListWidgetState extends State<FoodListWidget> {
                                                 Container(
                                                   color: Colors.white,
                                                   child: Image.network(
-                                                    food.imageName,
-                                                    fit: BoxFit.cover,
-                                                    width: double.infinity,
-                                                    errorBuilder: (context,
-                                                            error,
-                                                            stackTrace) =>
-                                                       const SizedBox(
-                                                        child: Center(
-                                                          child: Icon(
-                                                            Icons.broken_image,
-                                                            color: Colors.grey,
-                                                          ),
-                                                        ),
-                                                       )
-                                                  ),
+                                                      food.imageName,
+                                                      fit: BoxFit.cover,
+                                                      width: double.infinity,
+                                                      errorBuilder: (context,
+                                                              error,
+                                                              stackTrace) =>
+                                                          const SizedBox(
+                                                            child: Center(
+                                                              child: Icon(
+                                                                Icons
+                                                                    .broken_image,
+                                                                color:
+                                                                    Colors.grey,
+                                                              ),
+                                                            ),
+                                                          )),
                                                 ),
                                                 if (isOutOfStock)
                                                   Positioned.fill(

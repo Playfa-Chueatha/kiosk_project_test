@@ -116,32 +116,36 @@ class _MyHomePageState extends State<MyHomePage> {
                             ],
                           ),
                         ),
-                        Align(
-                            alignment: const Alignment(0, 10), // แก้ตรงนี้
-                            child: Column(
-                              children: [
-                                Image.asset(
-                                      'assets/images/Soi SiamW.png',
-                                      height: 35,
-                                    ),
-                                const Text(
-                                  'Soi Siam',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 60,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                        Positioned(
+                          top: MediaQuery.of(context).size.height *0.74, 
+                          left: -30,
+                          right: 0,
+                          
+                          child: Column(
+                            mainAxisSize: MainAxisSize
+                                .min, 
+                            children: [
+                              Image.asset(
+                                'assets/images/Soi SiamW.png',
+                                height: 40,
+                              ),
+                              const Text(
+                                'Soi Siam',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 40,                    
                                 ),
-                                const Text(
-                                  'Restaurant',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 60,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              ),
+                              const Text(
+                                'Restaurant',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 40,
                                 ),
-                              ],
-                            )),
+                              ),
+                            ],
+                          ),
+                        ),
                         Column(
                           children: [
                             Expanded(
