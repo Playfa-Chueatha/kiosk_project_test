@@ -25,21 +25,20 @@ class _RightPanelState extends State<RightPanel> {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
 
-    // กำหนดเงื่อนไขหน้าจอใหญ่
     final bool isLargeScreen = screenHeight > 1000;
 
-    double fontsizeOrder = screenWidth * 0.02 * (isLargeScreen ? 1.2 : 1.0);
-    double fontsizeNoOrder = screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
-    double fontsizefoodPrice = screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
-    double fontsizequantity = screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
-    double fontsizefoodDesc = screenWidth * 0.008 * (isLargeScreen ? 1.2 : 1.0);
-    double fontsizesubtotal = screenWidth * 0.015 * (isLargeScreen ? 1.2 : 1.0);
+    double fontsizeOrder = screenWidth * 0.02;
+    double fontsizeNoOrder = screenWidth * 0.01 ;
+    double fontsizefoodPrice = screenWidth * 0.009 ;
+    double fontsizequantity = screenWidth * 0.01 ;
+    double fontsizefoodDesc = screenWidth * 0.008 ;
+    double fontsizesubtotal = screenWidth * 0.01 ;
     double fontsizeConfirmorder =
-        screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
+        screenWidth * 0.01 * (isLargeScreen ? 1 : 1.0);
 
-    final buttonSizequantity = screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
+    final buttonSizequantity = screenWidth * 0.01 ;
     final buttonSizeIconquantity =
-        screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
+        screenWidth * 0.01 ;
 
     final EdgeInsets contentPadding = isLargeScreen
         ? const EdgeInsets.fromLTRB(60, 20, 60, 20)

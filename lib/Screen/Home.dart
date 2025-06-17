@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:kiosk_project_test/Screen/SelfService_Experience.dart';
 import 'package:kiosk_project_test/Screen/main_screen.dart';
 import 'package:kiosk_project_test/widget/footer_sheet.dart';
 
@@ -72,28 +73,43 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 ),
                 Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                    child: Align(
-                      alignment: Alignment.centerRight,
-                      child: PopupMenuButton<String>(
-                        icon: Image.asset('assets/images/flag_usa.png',
-                            height: 30, width: 30),
-                        onSelected: (value) {
+                  padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: PopupMenuButton<String>(
+                      icon: Image.asset('assets/images/flag_usa.png',
+                          height: 30, width: 30),
+                      onSelected: (value) {
+                        if (value == 'English') {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('เลือก: \$value')),
+                            const SnackBar(content: Text('เลือก: English')),
                           );
-                        },
-                        itemBuilder: (context) => const [
-                          PopupMenuItem(
-                              value: 'English', child: Text('English')),
-                          PopupMenuItem(
-                              value: 'Setting', child: Text('Setting')),
-                          PopupMenuItem(
-                              value: 'Store Management',
-                              child: Text('Store Management')),
-                        ],
-                      ),
-                    )),
+                        } else if (value == 'Setting') {
+                          
+                          Future.microtask(() {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SelfService()),
+                            );
+                          });
+                        } else if (value == 'Store Management') {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('เลือก: Store Management')),
+                          );
+                        }
+                      },
+                      itemBuilder: (context) => const [
+                        PopupMenuItem(value: 'English', child: Text('English')),
+                        PopupMenuItem(value: 'Setting', child: Text('Setting')),
+                        PopupMenuItem(
+                            value: 'Store Management',
+                            child: Text('Store Management')),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
             Expanded(
@@ -117,13 +133,11 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                         Positioned(
-                          top: MediaQuery.of(context).size.height *0.74, 
+                          top: MediaQuery.of(context).size.height * 0.74,
                           left: -30,
                           right: 0,
-                          
                           child: Column(
-                            mainAxisSize: MainAxisSize
-                                .min, 
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               Image.asset(
                                 'assets/images/Soi SiamW.png',
@@ -133,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                 'Soi Siam',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 40,                    
+                                  fontSize: 40,
                                 ),
                               ),
                               const Text(
