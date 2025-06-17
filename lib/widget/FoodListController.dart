@@ -1,5 +1,3 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kiosk_project_test/bloc/bloc_VisibleCategory.dart';
@@ -14,6 +12,9 @@ class FoodListController {
   final Map<String, int> _categoryIndexMap = {};
   List<String> _orderCategory = [];
   final Function(String)? onCategoryChanged;
+  String? _lastVisibleCategoryId;
+  bool _isScrolling = false;
+  bool _isProgrammaticScrolling = false;
 
   ItemScrollController get scrollController => _scrollController;
   List<String> get orderCategory => _orderCategory;
@@ -30,15 +31,29 @@ class FoodListController {
   void dispose() {}
 
   void onScroll(BuildContext context) {
-    final positions = itemPositionsListener.itemPositions.value;
-    if (positions.isEmpty) return;
+  if (_isScrolling) return; 
+  if (_isProgrammaticScrolling) return; 
 
-    if (_orderCategory.isEmpty) return;
+  _isScrolling = true;
+
+  Future.delayed(const Duration(milliseconds: 100), () {
+    final positions = itemPositionsListener.itemPositions.value;
+    if (positions.isEmpty) {
+      _isScrolling = false;
+      return;
+    }
+    if (_orderCategory.isEmpty) {
+      _isScrolling = false;
+      return;
+    }
 
     final visibleItems = positions.where((position) =>
         position.itemLeadingEdge >= 0 && position.itemLeadingEdge < 1);
 
-    if (visibleItems.isEmpty) return;
+    if (visibleItems.isEmpty) {
+      _isScrolling = false;
+      return;
+    }
 
     final firstVisiblePosition = visibleItems.reduce((a, b) =>
         a.itemLeadingEdge < b.itemLeadingEdge ||
@@ -51,25 +66,21 @@ class FoodListController {
     if (visibleIndex >= 0 && visibleIndex < _orderCategory.length) {
       final visibleCategoryId = _orderCategory[visibleIndex];
 
-      print(
-          'Scrolling... visible index: $visibleIndex, visible categoryId: $visibleCategoryId');
+      if (_lastVisibleCategoryId != visibleCategoryId) {
+        _lastVisibleCategoryId = visibleCategoryId;
 
-      
-      if (onCategoryChanged != null) {
-        print('Calling onCategoryChanged with $visibleCategoryId');
-        onCategoryChanged!(visibleCategoryId);
-      }
+        context.read<VisibleCategoryBloc>().add(UpdateVisibleCategory(visibleCategoryId));
 
-      final currentBlocState = context.read<VisibleCategoryBloc>().state;
-
-      if (currentBlocState == null ||
-          currentBlocState.visibleCategoryId != visibleCategoryId) {
-        context
-            .read<VisibleCategoryBloc>()
-            .add(UpdateVisibleCategory(visibleCategoryId));
+        if (onCategoryChanged != null) {
+          onCategoryChanged!(visibleCategoryId);
+        }
       }
     }
-  }
+
+    _isScrolling = false;
+  });
+}
+
 
   void didUpdateWidget(
     String oldSelectedFoodSetId,
@@ -135,11 +146,15 @@ class FoodListController {
   void _scrollToCategory(String categoryId) {
     final index = _categoryIndexMap[categoryId];
     if (index != null) {
+      _isProgrammaticScrolling = true;
       _scrollController.scrollTo(
         index: index,
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
-      );
+      ).then((_) {
+        
+        _isProgrammaticScrolling = false;
+      });
     }
   }
 
@@ -177,10 +192,10 @@ class FoodListController {
 
   void updateCategoryOrderAndMap(
       List<MapEntry<String, List<FoodData>>> sortedEntries) {
-    _orderCategory = sortedEntries.map((entry) => entry.key).toList();
+    _orderCategory = sortedEntries.map((e) => e.key).toList();
     _categoryIndexMap.clear();
-    for (int i = 0; i < _orderCategory.length; i++) {
-      _categoryIndexMap[_orderCategory[i]] = i;
+    for (int i = 0; i < sortedEntries.length; i++) {
+      _categoryIndexMap[sortedEntries[i].key] = i;
     }
   }
 }

@@ -68,6 +68,7 @@ class _FoodListWidgetState extends State<FoodList> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final scaleFactor = screenWidth / 600;
+    
 
     return BlocBuilder<FoodCategoryBloc, FoodCategoryState>(
       builder: (context, catState) {
