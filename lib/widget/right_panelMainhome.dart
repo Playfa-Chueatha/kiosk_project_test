@@ -22,20 +22,31 @@ class RightPanel extends StatefulWidget {
 class _RightPanelState extends State<RightPanel> {
   @override
   Widget build(BuildContext context) {
-    double total = widget.selectedFoods
-        .fold(0, (sum, item) => sum + (item.foodPrice * item.quantity));
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
 
-    double fontsizeOrder = screenWidth * 0.02;
-    double fontsizeNoOrder = screenWidth * 0.01;
-    double fontsizefoodPrice = screenWidth * 0.01;
-    double fontsizequantity = screenWidth * 0.01;
-    double fontsizefoodDesc = screenWidth * 0.008;
-    double fontsizesubtotal = screenWidth * 0.015;
-    double fontsizeConfirmorder = screenWidth * 0.01;
-    final buttonSizequantity = screenWidth * 0.01;
-    final buttonSizeIconquantity = screenWidth * 0.01;
+    // กำหนดเงื่อนไขหน้าจอใหญ่
+    final bool isLargeScreen = screenHeight > 1000;
+
+    double fontsizeOrder = screenWidth * 0.02 * (isLargeScreen ? 1.2 : 1.0);
+    double fontsizeNoOrder = screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
+    double fontsizefoodPrice = screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
+    double fontsizequantity = screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
+    double fontsizefoodDesc = screenWidth * 0.008 * (isLargeScreen ? 1.2 : 1.0);
+    double fontsizesubtotal = screenWidth * 0.015 * (isLargeScreen ? 1.2 : 1.0);
+    double fontsizeConfirmorder =
+        screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
+
+    final buttonSizequantity = screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
+    final buttonSizeIconquantity =
+        screenWidth * 0.01 * (isLargeScreen ? 1.2 : 1.0);
+
+    final EdgeInsets contentPadding = isLargeScreen
+        ? const EdgeInsets.fromLTRB(60, 20, 60, 20)
+        : const EdgeInsets.fromLTRB(40, 10, 40, 10);
+
+    double total = widget.selectedFoods
+        .fold(0, (sum, item) => sum + (item.foodPrice * item.quantity));
 
     return Container(
       decoration: BoxDecoration(
@@ -57,7 +68,8 @@ class _RightPanelState extends State<RightPanel> {
             alignment: Alignment.centerRight,
             child: PopupMenuButton<String>(
               icon: Image.asset('assets/images/flag_usa.png',
-                  height: 30, width: 30),
+                  height: 30 * (isLargeScreen ? 1.2 : 1.0),
+                  width: 30 * (isLargeScreen ? 1.2 : 1.0)),
               onSelected: (value) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('เลือก: $value')),
@@ -73,7 +85,7 @@ class _RightPanelState extends State<RightPanel> {
           ),
 
           Padding(
-            padding: const EdgeInsets.fromLTRB(40, 10, 40, 10),
+            padding: contentPadding,
             child: Text(
               'My Order',
               style: TextStyle(
@@ -85,7 +97,8 @@ class _RightPanelState extends State<RightPanel> {
           ),
           Center(
             child: Container(
-              padding: const EdgeInsets.fromLTRB(40, 5, 40, 5),
+              padding: EdgeInsets.fromLTRB(
+                  contentPadding.left, 5, contentPadding.right, 5),
               child: const Divider(
                 thickness: 2,
                 color: Colors.grey,
@@ -115,9 +128,16 @@ class _RightPanelState extends State<RightPanel> {
                         decoration: BoxDecoration(
                             color: const Color(0xFFF6F6F6),
                             borderRadius: BorderRadius.circular(10)),
-                        margin: const EdgeInsets.fromLTRB(40, 10, 30, 40),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
+                        margin: EdgeInsets.fromLTRB(
+                          screenWidth * 0.02,
+                          screenHeight * 0.01,
+                          screenWidth * 0.02,
+                          screenHeight * 0.01,
+                        ),
+                        padding: EdgeInsets.symmetric(
+                          horizontal: screenWidth * 0.02,
+                          vertical: screenHeight * 0.01,
+                        ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -135,7 +155,7 @@ class _RightPanelState extends State<RightPanel> {
                                   fontSize: fontsizefoodDesc,
                                   color: Colors.grey),
                             ),
-                            SizedBox(height: screenHeight *0.008),
+                            SizedBox(height: screenHeight * 0.008),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -156,27 +176,25 @@ class _RightPanelState extends State<RightPanel> {
                                       shape: const CircleBorder(),
                                       fillColor: Colors.grey[300],
                                       constraints: BoxConstraints.tightFor(
-                                          width: buttonSizequantity,
+                                        width: buttonSizequantity,
                                       ),
                                       elevation: 0,
                                       child: Icon(Icons.remove,
                                           color: Colors.black,
                                           size: buttonSizeIconquantity),
                                     ),
-                                    
                                     Text(
                                       food.quantity.toString().padLeft(2, '0'),
                                       style:
                                           TextStyle(fontSize: fontsizequantity),
                                     ),
-                                    
                                     RawMaterialButton(
                                       onPressed: () =>
                                           widget.onIncrease(food.foodId),
                                       shape: const CircleBorder(),
                                       fillColor: Colors.grey[300],
                                       constraints: BoxConstraints.tightFor(
-                                          width: buttonSizequantity,
+                                        width: buttonSizequantity,
                                       ),
                                       elevation: 0,
                                       child: Icon(Icons.add,
@@ -194,7 +212,8 @@ class _RightPanelState extends State<RightPanel> {
           ),
           Center(
             child: Container(
-              padding: const EdgeInsets.fromLTRB(40, 5, 40, 5),
+              padding: EdgeInsets.fromLTRB(
+                  contentPadding.left * 0.6, 5, contentPadding.right * 0.6, 5),
               child: const Divider(
                 thickness: 1,
                 color: Colors.grey,
@@ -203,7 +222,7 @@ class _RightPanelState extends State<RightPanel> {
           ),
 
           Padding(
-            padding: const EdgeInsets.fromLTRB(40, 10, 40, 10),
+            padding: contentPadding,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -217,16 +236,26 @@ class _RightPanelState extends State<RightPanel> {
                     style: TextStyle(
                         fontSize: fontsizesubtotal,
                         color: widget.selectedFoods.isEmpty
-                              ?const Color(0xFF4F4F4F)
-                              :const Color(0xFF7B61FF),
+                            ? const Color(0xFF4F4F4F)
+                            : const Color(0xFF7B61FF),
                         fontWeight: FontWeight.bold)),
               ],
             ),
           ),
           Center(
             child: Container(
-              padding: const EdgeInsets.fromLTRB(25, 20, 25, 20),
-              margin: const EdgeInsets.fromLTRB(30, 5, 30, 30),
+              padding: EdgeInsets.fromLTRB(
+                screenWidth * 0.02,
+                screenHeight * 0.02,
+                screenWidth * 0.02,
+                screenHeight * 0.02,
+              ),
+              margin: EdgeInsets.fromLTRB(
+                screenWidth * 0.02,
+                screenHeight * 0.001,
+                screenWidth * 0.02,
+                screenHeight * 0.03,
+              ),
               decoration: BoxDecoration(
                 color: widget.selectedFoods.isEmpty
                     ? const Color(0xFF8D8D8D)
@@ -236,9 +265,17 @@ class _RightPanelState extends State<RightPanel> {
               child: TextButton.icon(
                 onPressed: () {},
                 icon: const Icon(Icons.shopping_cart, color: Colors.white),
-                label: Text(
-                  'Confirm Order (${widget.selectedFoods.length})',
-                  style: TextStyle(color: Colors.white, fontSize: fontsizeConfirmorder),
+                label: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    'Confirm Order (${widget.selectedFoods.length})',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: fontsizeConfirmorder,
+                    ),
+                  ),
                 ),
               ),
             ),

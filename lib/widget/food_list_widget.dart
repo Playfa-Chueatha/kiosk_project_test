@@ -34,7 +34,6 @@ class _FoodListWidgetState extends State<FoodList> {
   late final FoodListController _controller = FoodListController(
     itemPositionsListener: ItemPositionsListener.create(),
     onCategoryChanged: widget.onCategoryChanged,
-
   );
 
   @override
@@ -68,7 +67,6 @@ class _FoodListWidgetState extends State<FoodList> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final scaleFactor = screenWidth / 600;
-    
 
     return BlocBuilder<FoodCategoryBloc, FoodCategoryState>(
       builder: (context, catState) {
@@ -147,8 +145,15 @@ class _FoodListWidgetState extends State<FoodList> {
     );
   }
 
-  int _getCrossAxisCount(double width, Orientation orientation) =>
-      width >= 1000 ? 4 : width >= 600 ? (orientation == Orientation.portrait ? 2 : 3) : 2;
+  int _getCrossAxisCount(double width, Orientation orientation) {
+    if (width >= 1200) { // จอใหญ่ เช่น 12.5 นิ้ว
+      return orientation == Orientation.portrait ? 2 : 4;
+    } else if (width >= 600) { // จอกลาง
+      return orientation == Orientation.portrait ? 2 : 3;
+    } else { // จอเล็ก
+      return 2;
+    }
+  }
 }
 
 class FoodCard extends StatelessWidget {
