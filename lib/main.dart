@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kiosk_project_test/Screen/Home.dart';
+import 'package:kiosk_project_test/Screen/home.dart';
 import 'package:kiosk_project_test/bloc/bloc_VisibleCategory.dart';
 import 'package:kiosk_project_test/bloc/bloc_cetagoryfood.dart';
 import 'package:kiosk_project_test/bloc/bloc_food_data.dart';
@@ -46,7 +46,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Kiosk Project Test',
-        home: const MyHomePage(),
+        home: const MyHomepage(),
         scrollBehavior: const MaterialScrollBehavior().copyWith(
           dragDevices: {
             PointerDeviceKind.touch,

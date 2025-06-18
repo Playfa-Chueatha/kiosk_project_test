@@ -1,18 +1,16 @@
-// ignore_for_file: file_names
-
 import 'package:flutter/material.dart';
-import 'package:kiosk_project_test/Screen/SelfService_Experience.dart';
+import 'package:kiosk_project_test/Screen/self_service_experience.dart';
 import 'package:kiosk_project_test/Screen/main_screen.dart';
 import 'package:kiosk_project_test/widget/footer_sheet.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class MyHomepage extends StatefulWidget {
+  const MyHomepage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomepage> createState() => _MyHomepageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomepageState extends State<MyHomepage> {
   TextStyle mainTextStyle(double fontSize) {
     return TextStyle(
       fontSize: fontSize,
