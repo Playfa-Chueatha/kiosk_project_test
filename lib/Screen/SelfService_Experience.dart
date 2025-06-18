@@ -1,6 +1,9 @@
+// ignore_for_file: file_names
+
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:kiosk_project_test/Screen/main_screen.dart';
 
 class SelfService extends StatefulWidget {
   const SelfService({super.key});
@@ -20,76 +23,132 @@ class _SelfServiceState extends State<SelfService> {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
-    final height = MediaQuery.of(context).size.height;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isPortrait = screenHeight > screenWidth;
+
+    final double baseSize = isPortrait ? screenWidth : screenHeight;
+
+
+    double maintext = baseSize * 0.1;
+    double selfCheckout = baseSize * 0.03;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFB),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(width),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(height: height *0.2),
-                  AutoSizeText(
-                    'Self-Service',
-                    style: mainTextStyle(120),
-                    maxLines: 1,
-                    minFontSize: 20,
-                  ),
-                  AutoSizeText(
-                    'Experience.',
-                    style: mainTextStyle(120),
-                    maxLines: 1,
-                    minFontSize: 20,
-                  ),
-                  const AutoSizeText(
-                    'From self-order to self-checkout',
-                    style: TextStyle(
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 40,
+        backgroundColor: const Color(0xFFFBFBFB),
+        body: isPortrait
+            ? SafeArea(
+                child: Column(
+                  children: [
+                    _buildHeader(screenWidth),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('Self-Service',
+                              style: TextStyle(fontSize: maintext)),
+                          Text('Experience.',
+                              style: TextStyle(fontSize: maintext)),
+                          Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                screenWidth * 0.02,
+                                screenHeight * 0.03,
+                                screenWidth * 0.02,
+                                screenHeight * 0.005,
+                              ),
+                              child: Text(
+                                'From self-order to self-checkout',
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: selfCheckout,
+                                ),
+                              )),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Icon(Icons.credit_card,
+                                      color: const Color(0xFFEB5757),
+                                      size: screenWidth * 0.04)),
+                              Text(
+                                'Accept Credit Card Only',
+                                style: TextStyle(
+                                  color: const Color(0xFFEB5757),
+                                  fontSize: selfCheckout,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          _buildCardRow(context),
+                          const Spacer(),
+                          _buildFooter(context),
+                        ],
+                      ),
                     ),
-                    maxLines: 1,
-                    minFontSize: 14,
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  ],
+                ),
+              )
+            : Column(
+                children: [
+                  Expanded(
+                      child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Icon(Icons.credit_card,
-                            color: const Color(0xFFEB5757),
-                            size: width * 0.04),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('Self-Service',
+                              style: TextStyle(fontSize: maintext)),
+                          Text(
+                            'Experience.',
+                            style: TextStyle(
+                              fontSize: maintext,
+                            ),
+                          ),
+                          Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                screenWidth * 0.02,
+                                screenHeight * 0.03,
+                                screenWidth * 0.02,
+                                screenHeight * 0.005,
+                              ),
+                              child: Text(
+                                'From self-order to self-checkout',
+                                style: TextStyle(
+                                  color: Colors.black87,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: selfCheckout,
+                                ),
+                              )),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                  padding: const EdgeInsets.all(5),
+                                  child: Icon(Icons.credit_card,
+                                      color: const Color(0xFFEB5757),
+                                      size: screenWidth * 0.025)),
+                              Text(
+                                'Accept Credit Card Only',
+                                style: TextStyle(
+                                    color: const Color(0xFFEB5757),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: selfCheckout),
+                              )
+                            ],
+                          ),
+                        ],
                       ),
-                      const AutoSizeText(
-                        'Accept Credit Card Only',
-                        style: TextStyle(
-                          color: Color(0xFFEB5757),
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        maxLines: 1,
-                        minFontSize: 14,
-                      ),
+                      _buildCardRow(context),
                     ],
-                  ),
-                  const SizedBox(height: 30),
-                  _buildCardRow(),
-                  const Spacer(),
+                  )),
                   _buildFooter(context),
                 ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+              ));
   }
 
   Widget _buildHeader(double width) {
@@ -132,8 +191,7 @@ class _SelfServiceState extends State<SelfService> {
               } else if (value == 'Setting') {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const SelfService()),
+                  MaterialPageRoute(builder: (context) => const SelfService()),
                 );
               } else if (value == 'Store Management') {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -153,76 +211,93 @@ class _SelfServiceState extends State<SelfService> {
     );
   }
 
-  Widget _buildCardRow() {
-    return const Row(
+  Widget _buildCardRow(BuildContext context) {
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Card(
-          color: Color(0xFF496EE2),
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: 300,
-                width: 300,
-                child: Image(
-                  image: AssetImage('assets/images/ani_to_stay.gif'),
-                  fit: BoxFit.cover,
+        InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MainScreen()),
+            );
+          },
+          child: const Card(
+            color: Color(0xFF496EE2),
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 300,
+                  width: 300,
+                  child: Image(
+                    image: AssetImage('assets/images/ani_to_stay.gif'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                  child: Text(
-                    'To Stay',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: Colors.white,
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Text(
+                      'To Stay',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
-        Card(
-          color: Color(0xFFFAA21C),
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(12)),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: 300,
-                width: 300,
-                child: Image(
-                  image: AssetImage('assets/images/ani_welcome_3.gif'),
-                  fit: BoxFit.cover,
+        const SizedBox(width: 16),
+        InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MainScreen()),
+            );
+          },
+          child: const Card(
+            color: Color(0xFFFAA21C),
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(12)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 300,
+                  width: 300,
+                  child: Image(
+                    image: AssetImage('assets/images/ani_welcome_3.gif'),
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 24),
-                child: Center(
-                  child: Text(
-                    'Togo Walk-in',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
-                      color: Colors.white,
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24),
+                  child: Center(
+                    child: Text(
+                      'Togo Walk-in',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],
@@ -230,14 +305,15 @@ class _SelfServiceState extends State<SelfService> {
   }
 
   Widget _buildFooter(BuildContext context) {
-    final maxWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    final bool isPortrait = orientation == Orientation.portrait;
 
-    double titleFontSize = maxWidth < 400 ? 10 : 12;
-    double contentFontSize = maxWidth < 400 ? 10 : 12;
-    double buttonFontSize = maxWidth < 400 ? 12 : 14;
-    EdgeInsetsGeometry buttonPadding = maxWidth < 400
-        ? const EdgeInsets.symmetric(vertical: 6, horizontal: 8)
-        : const EdgeInsets.all(10);
+    final double baseSize = isPortrait ? screenWidth : screenHeight;
+
+    double titleFontSize = baseSize * 0.02;
+    double contentFontSize = baseSize * 0.015;
 
     return Container(
       width: double.infinity,
@@ -280,13 +356,104 @@ class _SelfServiceState extends State<SelfService> {
                 ),
                 Expanded(
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 60.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: _buildContactButtons(
-                        buttonFontSize: buttonFontSize,
-                        buttonPadding: buttonPadding,
-                      ),
+                    padding: const EdgeInsets.only(left: 70.0),
+                    child: DataTable(
+                      dataRowMinHeight: 30,
+                      dataRowMaxHeight: 30,
+                      columnSpacing: 0,
+                      columns: const [
+                        DataColumn(
+                          label: Text(
+                            '',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 0.1,
+                            ),
+                          ),
+                        ),
+                      ],
+                      rows: [
+                        DataRow(
+                          cells: [
+                            DataCell(
+                              Row(
+                                children: [
+                                  Icon(Icons.phone,
+                                      color: Colors.white, size: titleFontSize),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    '090-890-xxxx',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: titleFontSize,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        DataRow(
+                          cells: [
+                            DataCell(
+                              Row(
+                                children: [
+                                  Icon(FontAwesomeIcons.instagram,
+                                      color: Colors.white, size: titleFontSize),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'SoiSiam',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: titleFontSize,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        DataRow(
+                          cells: [
+                            DataCell(
+                              Row(
+                                children: [
+                                  Icon(FontAwesomeIcons.youtube,
+                                      color: Colors.white, size: titleFontSize),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'SoiSiam Channel',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: titleFontSize,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        DataRow(
+                          cells: [
+                            DataCell(
+                              Row(
+                                children: [
+                                  Icon(Icons.email,
+                                      color: Colors.white, size: titleFontSize),
+                                  const SizedBox(width: 10),
+                                  Text(
+                                    'SoiSiam@gmail.co.th',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: titleFontSize,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -307,7 +474,7 @@ class _SelfServiceState extends State<SelfService> {
                   padding: const EdgeInsets.all(5),
                   child: Image.asset(
                     'assets/images/logo.png',
-                    height: maxWidth * 0.02,
+                    height: screenWidth * 0.02,
                   ),
                 ),
               ],
@@ -316,76 +483,5 @@ class _SelfServiceState extends State<SelfService> {
         ),
       ),
     );
-  }
-
-  List<Widget> _buildContactButtons({
-    double buttonFontSize = 14,
-    EdgeInsetsGeometry buttonPadding = const EdgeInsets.all(5),
-  }) {
-    return [
-      DataTable(
-        columns: const [
-          DataColumn(
-            label: Text(' ', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-        rows: const [
-          DataRow(
-            cells: [
-              DataCell(
-                Row(
-                  children: [
-                    Icon(Icons.phone, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text('090-890-xxxx', style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          DataRow(
-            cells: [
-              DataCell(
-                Row(
-                  children: [
-                    Icon(FontAwesomeIcons.instagram, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text('SoiSiam', style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          DataRow(
-            cells: [
-              DataCell(
-                Row(
-                  children: [
-                    Icon(FontAwesomeIcons.youtube, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text('SoiSiam Channel',
-                        style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          DataRow(
-            cells: [
-              DataCell(
-                Row(
-                  children: [
-                    Icon(Icons.email, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text('SoiSiam@gmail.co.th',
-                        style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ];
   }
 }

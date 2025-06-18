@@ -53,7 +53,6 @@ class _LeftPanelState extends State<LeftPanel> {
             .add(UpdateVisibleCategory(categoryId));
       }
     } else {
-      print("LeftPanel: Resetting tap state due to different category");
       setState(() {
         _userTappedCategoryId = null;
         _hasUserTappedCategory = false;
@@ -77,6 +76,7 @@ class _LeftPanelState extends State<LeftPanel> {
   @override
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
 
     return Stack(
       children: [
@@ -84,9 +84,13 @@ class _LeftPanelState extends State<LeftPanel> {
           color: Colors.white,
           child: Column(
             children: [
-              SizedBox(height: screenHeight * 0.0),
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                padding: EdgeInsets.fromLTRB(
+                  screenWidth * 0.02,
+                  screenHeight * 0.04,
+                  screenWidth * 0.02,
+                  screenHeight * 0.01,
+                ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -97,11 +101,11 @@ class _LeftPanelState extends State<LeftPanel> {
                       icon: const Icon(
                         FontAwesomeIcons.chevronLeft,
                         color: Colors.black,
-                        size: 24,
+                        size: 28,
                       ),
                       label: const Text(
                         'Back',
-                        style: TextStyle(color: Colors.black, fontSize: 24),
+                        style: TextStyle(color: Colors.black, fontSize: 28),
                       ),
                       style: TextButton.styleFrom(
                         backgroundColor: const Color(0xFFF6F6F6),
@@ -123,7 +127,7 @@ class _LeftPanelState extends State<LeftPanel> {
               const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
-                child: NationalFoodCategory(
+                child: foodSet(
                   onSelected: (selectedFoodSet) {
                     setState(() {
                       _selectedFoodSetId = selectedFoodSet.foodSetId;

@@ -1,7 +1,6 @@
 // ignore_for_file: file_names
 
 import 'package:flutter/material.dart';
-import 'package:auto_size_text/auto_size_text.dart';
 import 'package:kiosk_project_test/Screen/SelfService_Experience.dart';
 import 'package:kiosk_project_test/Screen/main_screen.dart';
 import 'package:kiosk_project_test/widget/footer_sheet.dart';
@@ -25,10 +24,18 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final orientation = MediaQuery.of(context).orientation;
-    final isPortrait = orientation == Orientation.portrait;
-    final double screenHeight = size.height;
-    final double screenWidth = size.width;
+
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isPortrait = screenHeight > screenWidth;
+    final double baseSize = isPortrait ? screenWidth : screenHeight;
+
+    final double iconSoiSiam = baseSize * 0.03;
+
+    double maintext = baseSize * 0.1;
+    double taptoorderSize = baseSize * 0.03;
+    double selfCheckout = baseSize * 0.03;
+    double soisiamrestaurant = baseSize * 0.04;
 
     final width = MediaQuery.of(context).size.width;
 
@@ -46,11 +53,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         FooterSheet.show(context);
                       },
                       child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 20, 5, 20),
+                        padding: EdgeInsets.fromLTRB(
+                          screenWidth * 0.02,
+                          screenHeight * 0.04,
+                          screenWidth * 0.01,
+                          screenHeight * 0.01,
+                        ),
                         child: Image.asset(
                           'assets/images/Soi Siam.png',
-                          height: 25,
-                          width: 25,
+                          height: iconSoiSiam,
                         ),
                       ),
                     ),
@@ -58,14 +69,19 @@ class _MyHomePageState extends State<MyHomePage> {
                       onTap: () {
                         FooterSheet.show(context);
                       },
-                      child: const Padding(
-                        padding: EdgeInsets.fromLTRB(5, 20, 20, 20),
+                      child: Padding(
+                        padding: EdgeInsets.fromLTRB(
+                          screenWidth * 0.00,
+                          screenHeight * 0.04,
+                          screenWidth * 0.02,
+                          screenHeight * 0.01,
+                        ),
                         child: Text(
                           'Soi Siam',
                           style: TextStyle(
-                            fontSize: 26,
+                            fontSize: iconSoiSiam,
                             fontWeight: FontWeight.w500,
-                            color: Color.fromARGB(255, 102, 102, 102),
+                            color: const Color.fromARGB(255, 102, 102, 102),
                           ),
                         ),
                       ),
@@ -73,24 +89,28 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                  padding: EdgeInsets.fromLTRB(
+                    screenWidth * 0.00,
+                    screenHeight * 0.04,
+                    screenWidth * 0.02,
+                    screenHeight * 0.01,
+                  ),
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: PopupMenuButton<String>(
                       icon: Image.asset('assets/images/flag_usa.png',
-                          height: 30, width: 30),
+                          height: iconSoiSiam),
                       onSelected: (value) {
                         if (value == 'English') {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('เลือก: English')),
                           );
                         } else if (value == 'Setting') {
-                          
                           Future.microtask(() {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => SelfService()),
+                                  builder: (context) => const SelfService()),
                             );
                           });
                         } else if (value == 'Store Management') {
@@ -133,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                         ),
                         Positioned(
-                          top: MediaQuery.of(context).size.height * 0.74,
+                          top: MediaQuery.of(context).size.height * 0.71,
                           left: -30,
                           right: 0,
                           child: Column(
@@ -141,20 +161,20 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: [
                               Image.asset(
                                 'assets/images/Soi SiamW.png',
-                                height: 40,
+                                height: soisiamrestaurant,
                               ),
-                              const Text(
+                              Text(
                                 'Soi Siam',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 40,
+                                  fontSize: soisiamrestaurant,
                                 ),
                               ),
-                              const Text(
+                              Text(
                                 'Restaurant',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 40,
+                                  fontSize: soisiamrestaurant,
                                 ),
                               ),
                             ],
@@ -181,30 +201,25 @@ class _MyHomePageState extends State<MyHomePage> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      AutoSizeText(
-                                        'Self-Service',
-                                        style: mainTextStyle(120),
-                                        maxLines: 1,
-                                        minFontSize: 20,
-                                      ),
-                                      AutoSizeText(
-                                        'Experience.',
-                                        style: mainTextStyle(120),
-                                        maxLines: 1,
-                                        minFontSize: 20,
-                                      ),
-                                      const SizedBox(height: 10),
-                                      const AutoSizeText(
-                                        'From self-order to self-checkout',
-                                        style: TextStyle(
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 40,
-                                        ),
-                                        maxLines: 1,
-                                        minFontSize: 14,
-                                      ),
-                                      const SizedBox(height: 10),
+                                      Text('Self-Service',
+                                          style: TextStyle(fontSize: maintext)),
+                                      Text('Experience.',
+                                          style: TextStyle(fontSize: maintext)),
+                                      Padding(
+                                          padding: EdgeInsets.fromLTRB(
+                                            screenWidth * 0.02,
+                                            screenHeight * 0.03,
+                                            screenWidth * 0.02,
+                                            screenHeight * 0.005,
+                                          ),
+                                          child: Text(
+                                            'From self-order to self-checkout',
+                                            style: TextStyle(
+                                              color: Colors.black87,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: selfCheckout,
+                                            ),
+                                          )),
                                       Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
@@ -215,21 +230,21 @@ class _MyHomePageState extends State<MyHomePage> {
                                                   color:
                                                       const Color(0xFFEB5757),
                                                   size: width * 0.04)),
-                                          const AutoSizeText(
+                                          Text(
                                             'Accept Credit Card Only',
                                             style: TextStyle(
-                                              color: Color(0xFFEB5757),
-                                              fontSize: 40,
+                                              color: const Color(0xFFEB5757),
+                                              fontSize: selfCheckout,
                                               fontWeight: FontWeight.bold,
                                             ),
-                                            maxLines: 1,
-                                            minFontSize: 14,
                                           ),
                                         ],
                                       ),
                                       Padding(
-                                        padding:
-                                            const EdgeInsetsDirectional.all(10),
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: screenWidth * 0.08,
+                                          vertical: screenHeight * 0.02,
+                                        ),
                                         child: OutlinedButton(
                                           style: OutlinedButton.styleFrom(
                                             backgroundColor:
@@ -247,13 +262,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       const MainScreen()),
                                             );
                                           },
-                                          child: const Padding(
-                                            padding:
-                                                EdgeInsetsDirectional.all(20),
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(
+                                              horizontal: screenWidth * 0.07,
+                                              vertical: screenHeight * 0.02,
+                                            ),
                                             child: Text('Tap to Order',
                                                 style: TextStyle(
                                                   color: Colors.white,
-                                                  fontSize: 50,
+                                                  fontSize: taptoorderSize,
                                                 )),
                                           ),
                                         ),
@@ -283,25 +300,29 @@ class _MyHomePageState extends State<MyHomePage> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              AutoSizeText('Self-Service',
-                                  style: mainTextStyle(124),
-                                  maxLines: 1,
-                                  minFontSize: 36),
-                              AutoSizeText('Experience.',
-                                  style: mainTextStyle(124),
-                                  maxLines: 1,
-                                  minFontSize: 36),
-                              const SizedBox(height: 20),
-                              const AutoSizeText(
-                                'From self-order to self-checkout',
+                              Text('Self-Service',
+                                  style: TextStyle(fontSize: maintext)),
+                              Text(
+                                'Experience.',
                                 style: TextStyle(
-                                    color: Colors.grey,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 34),
-                                maxLines: 1,
-                                minFontSize: 16,
+                                  fontSize: maintext,
+                                ),
                               ),
-                              const SizedBox(height: 10),
+                              Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    screenWidth * 0.02,
+                                    screenHeight * 0.03,
+                                    screenWidth * 0.02,
+                                    screenHeight * 0.005,
+                                  ),
+                                  child: Text(
+                                    'From self-order to self-checkout',
+                                    style: TextStyle(
+                                      color: Colors.black87,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: selfCheckout,
+                                    ),
+                                  )),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -310,39 +331,48 @@ class _MyHomePageState extends State<MyHomePage> {
                                       child: Icon(Icons.credit_card,
                                           color: const Color(0xFFEB5757),
                                           size: width * 0.025)),
-                                  const AutoSizeText(
+                                  Text(
                                     'Accept Credit Card Only',
                                     style: TextStyle(
-                                        color: Color(0xFFEB5757),
+                                        color: const Color(0xFFEB5757),
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 34),
-                                    minFontSize: 16,
-                                    maxLines: 1,
+                                        fontSize: selfCheckout),
                                   )
                                 ],
                               ),
                               Padding(
-                                padding: const EdgeInsetsDirectional.all(10),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.05,
+                                  vertical: screenHeight * 0.04,
+                                ),
                                 child: OutlinedButton(
                                   style: OutlinedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF496EE2),
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10))),
+                                    backgroundColor: const Color(0xFF496EE2),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
                                   onPressed: () {
                                     Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                const MainScreen()));
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const MainScreen()),
+                                    );
                                   },
-                                  child: const Padding(
-                                    padding: EdgeInsetsDirectional.all(20),
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: screenWidth * 0.06,
+                                      vertical: screenHeight * 0.04,
+                                    ),
                                     child: Text('Tap to Order',
-                                        style: TextStyle(color: Colors.white)),
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: taptoorderSize,
+                                        )),
                                   ),
                                 ),
-                              ),
+                              )
                             ],
                           ),
                         ),
@@ -355,20 +385,20 @@ class _MyHomePageState extends State<MyHomePage> {
                               Image.asset('assets/images/ani_welcome_3.gif',
                                   fit: BoxFit.cover),
                               Align(
-                                alignment: const Alignment(-0.1, 0.25),
+                                alignment: const Alignment(-0.08, 0.3),
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Image.asset(
                                       'assets/images/Soi SiamW.png',
-                                      height: 35,
+                                      height: soisiamrestaurant,
                                     ),
                                     const SizedBox(width: 8),
-                                    const Text(
+                                    Text(
                                       'Soi Siam',
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: 40,
+                                        fontSize: soisiamrestaurant,
                                       ),
                                     ),
                                   ],

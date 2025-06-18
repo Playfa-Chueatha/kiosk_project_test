@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -54,9 +56,9 @@ class VisibleCategoryBloc
 
   VisibleCategoryBloc() : super(const VisibleCategoryInitial()) {
     on<UpdateVisibleCategory>((event, emit) {
-      print('[Bloc] UpdateVisibleCategory: ${event.categoryId}');
+      // print('[Bloc] UpdateVisibleCategory: ${event.categoryId}');
       if (state.visibleCategoryId == event.categoryId && state.locked) {
-        print('Skip emit because same category and locked');
+        
         return;
       }
       emit(VisibleCategoryState(

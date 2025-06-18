@@ -24,25 +24,27 @@ class _RightPanelState extends State<RightPanel> {
   Widget build(BuildContext context) {
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    final bool isPortrait = orientation == Orientation.portrait;
 
-    final bool isLargeScreen = screenHeight > 1000;
+    final double baseSize = isPortrait ? screenWidth : screenHeight;
 
-    double fontsizeOrder = screenWidth * 0.02;
-    double fontsizeNoOrder = screenWidth * 0.01 ;
-    double fontsizefoodPrice = screenWidth * 0.009 ;
-    double fontsizequantity = screenWidth * 0.01 ;
-    double fontsizefoodDesc = screenWidth * 0.008 ;
-    double fontsizesubtotal = screenWidth * 0.01 ;
-    double fontsizeConfirmorder =
-        screenWidth * 0.01 * (isLargeScreen ? 1 : 1.0);
+    // ปรับขนาด
+    double fontsizeOrder = baseSize * 0.03;
+    double fontsizeNoOrder = baseSize * 0.018;
+    double fontsizefoodPrice = baseSize * 0.018;
+    double fontsizequantity = baseSize * 0.02;
+    double fontsizefoodDesc = baseSize * 0.015;
+    double fontsizesubtotal = baseSize * 0.02;
+    double fontsizeConfirmorder = baseSize * 0.025;
 
-    final buttonSizequantity = screenWidth * 0.01 ;
-    final buttonSizeIconquantity =
-        screenWidth * 0.01 ;
+    //ปุ่ม + -
+    final double buttonSizequantity = baseSize * 0.02;
+    final double buttonSizeIconquantity = baseSize * 0.02;
 
-    final EdgeInsets contentPadding = isLargeScreen
-        ? const EdgeInsets.fromLTRB(60, 20, 60, 20)
-        : const EdgeInsets.fromLTRB(40, 10, 40, 10);
+    final EdgeInsets contentPadding = isPortrait
+        ? const EdgeInsets.fromLTRB(20, 10, 20, 10)
+        : const EdgeInsets.fromLTRB(40, 20, 40, 20);
 
     double total = widget.selectedFoods
         .fold(0, (sum, item) => sum + (item.foodPrice * item.quantity));
@@ -62,13 +64,17 @@ class _RightPanelState extends State<RightPanel> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(height: screenHeight * 0.03),
-          Align(
+          Padding(padding:EdgeInsets.fromLTRB(
+            screenWidth * 0.02,
+                  screenHeight * 0.04,
+                  screenWidth * 0.02,
+                  screenHeight * 0.01,
+          ),child: Align(
             alignment: Alignment.centerRight,
             child: PopupMenuButton<String>(
               icon: Image.asset('assets/images/flag_usa.png',
-                  height: 30 * (isLargeScreen ? 1.2 : 1.0),
-                  width: 30 * (isLargeScreen ? 1.2 : 1.0)),
+                  height: 30 * (isPortrait ? 1.0 : 1.2),
+                  width: 30 * (isPortrait ? 1.0 : 1.2)),
               onSelected: (value) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('เลือก: $value')),
@@ -77,11 +83,10 @@ class _RightPanelState extends State<RightPanel> {
               itemBuilder: (context) => const [
                 PopupMenuItem(value: 'English', child: Text('English')),
                 PopupMenuItem(value: 'Setting', child: Text('Setting')),
-                PopupMenuItem(
-                    value: 'Store Management', child: Text('Store Management')),
+                PopupMenuItem(value: 'Store Management', child: Text('Store Management')),
               ],
             ),
-          ),
+          )),
 
           Padding(
             padding: contentPadding,
@@ -105,7 +110,6 @@ class _RightPanelState extends State<RightPanel> {
             ),
           ),
 
-          // Order list
           Expanded(
             child: widget.selectedFoods.isEmpty
                 ? Align(
@@ -134,7 +138,7 @@ class _RightPanelState extends State<RightPanel> {
                           screenHeight * 0.01,
                         ),
                         padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.02,
+                          horizontal: screenWidth * 0.01,
                           vertical: screenHeight * 0.01,
                         ),
                         child: Column(
@@ -148,18 +152,22 @@ class _RightPanelState extends State<RightPanel> {
                                 decoration: TextDecoration.underline,
                               ),
                             ),
+                            
                             Text(
                               food.foodDesc,
+                              maxLines: 3,
                               style: TextStyle(
                                   fontSize: fontsizefoodDesc,
-                                  color: Colors.grey),
+                                  color: Colors.grey,
+                                  
+                                  ),
                             ),
                             SizedBox(height: screenHeight * 0.008),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  '\$${(food.foodPrice * food.quantity).toStringAsFixed(2)} ',
+                                  '\$${(food.foodPrice * food.quantity).toStringAsFixed(2)}',
                                   style: TextStyle(
                                     fontSize: fontsizefoodPrice,
                                     fontWeight: FontWeight.bold,
@@ -176,6 +184,7 @@ class _RightPanelState extends State<RightPanel> {
                                       fillColor: Colors.grey[300],
                                       constraints: BoxConstraints.tightFor(
                                         width: buttonSizequantity,
+                                        height: buttonSizequantity,
                                       ),
                                       elevation: 0,
                                       child: Icon(Icons.remove,
@@ -184,8 +193,8 @@ class _RightPanelState extends State<RightPanel> {
                                     ),
                                     Text(
                                       food.quantity.toString().padLeft(2, '0'),
-                                      style:
-                                          TextStyle(fontSize: fontsizequantity),
+                                      style: TextStyle(
+                                          fontSize: fontsizequantity),
                                     ),
                                     RawMaterialButton(
                                       onPressed: () =>
@@ -194,6 +203,7 @@ class _RightPanelState extends State<RightPanel> {
                                       fillColor: Colors.grey[300],
                                       constraints: BoxConstraints.tightFor(
                                         width: buttonSizequantity,
+                                        height: buttonSizequantity,
                                       ),
                                       elevation: 0,
                                       child: Icon(Icons.add,

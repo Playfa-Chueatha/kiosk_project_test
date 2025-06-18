@@ -1,18 +1,20 @@
+// ignore_for_file: camel_case_types
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kiosk_project_test/bloc/bloc_nationalcetagoryfood.dart';
 import 'package:kiosk_project_test/data/Data_FoodSet.dart';
 
-class NationalFoodCategory extends StatefulWidget {
+class foodSet extends StatefulWidget {
   final void Function(FoodSet selectedFoodSet) onSelected;
 
-  const NationalFoodCategory({super.key, required this.onSelected});
+  const foodSet({super.key, required this.onSelected});
 
   @override
-  State<NationalFoodCategory> createState() => _NationalFoodCategoryState();
+  State<foodSet> createState() => _foodSetState();
 }
 
-class _NationalFoodCategoryState extends State<NationalFoodCategory> {
+class _foodSetState extends State<foodSet> {
   String? selectedCategoryId;
 
   @override

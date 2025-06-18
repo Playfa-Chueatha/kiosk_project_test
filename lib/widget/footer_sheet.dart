@@ -5,7 +5,13 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FooterSheet {
   static void show(BuildContext context) {
-    final width = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    final bool isPortrait = orientation == Orientation.portrait;
+
+    final double baseSize = isPortrait ? screenWidth : screenHeight;
+    double copyright = baseSize * 0.02;
 
     showModalBottomSheet(
       context: context,
@@ -31,26 +37,34 @@ class FooterSheet {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       _buildContent(context),
-                      const SizedBox(height: 30),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Text(
-                            '© Copyright 2022 | Powered by',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.white54,
-                            ),
+                      Padding(
+                          padding: EdgeInsets.fromLTRB(
+                            screenWidth * 0.02,
+                            screenHeight * 0.01,
+                            screenWidth * 0.02,
+                            screenHeight * 0.001,
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(5),
-                            child: Image.asset(
-                              'assets/images/logo.png',
-                              height: width * 0.02,
-                            ),
-                          )
-                        ],
-                      )
+                          child: Align(
+                              alignment: AlignmentDirectional.centerEnd,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    '© Copyright 2022 | Powered by',
+                                    style: TextStyle(
+                                      fontSize: copyright,
+                                      color: Colors.white54,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(5),
+                                    child: Image.asset(
+                                      'assets/images/logo.png',
+                                      height: screenWidth * 0.025,
+                                    ),
+                                  )
+                                ],
+                              ))),
                     ],
                   ),
                 ),
@@ -63,14 +77,15 @@ class FooterSheet {
   }
 
   static Widget _buildContent(BuildContext context) {
-    final maxWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final Orientation orientation = MediaQuery.of(context).orientation;
+    final bool isPortrait = orientation == Orientation.portrait;
 
-    double titleFontSize = maxWidth < 400 ? 10 : 12;
-    double contentFontSize = maxWidth < 400 ? 10 : 12;
-    double buttonFontSize = maxWidth < 400 ? 12 : 14;
-    EdgeInsetsGeometry buttonPadding = maxWidth < 400
-        ? const EdgeInsets.symmetric(vertical: 6, horizontal: 8)
-        : const EdgeInsets.all(10);
+    final double baseSize = isPortrait ? screenWidth : screenHeight;
+
+    double titleFontSize = baseSize * 0.02;
+    double contentFontSize = baseSize * 0.015;
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -105,92 +120,107 @@ class FooterSheet {
         ),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(left: 60.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: _buildContactButtons(
-                buttonFontSize: buttonFontSize,
-                buttonPadding: buttonPadding,
-              ),
+            padding: const EdgeInsets.only(left: 70.0),
+            child: DataTable(
+              dataRowMinHeight: 30,
+              dataRowMaxHeight: 30,
+              columnSpacing: 0,
+              columns: const [
+                DataColumn(
+                  label: Text(
+                    '',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 0.1,
+                    ),
+                  ),
+                ),
+              ],
+              rows: [
+                DataRow(
+                  cells: [
+                    DataCell(
+                      Row(
+                        children: [
+                          Icon(Icons.phone, color: Colors.white,size: titleFontSize),
+                          const SizedBox(width: 10),
+                          Text(
+                            '090-890-xxxx',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: titleFontSize,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                DataRow(
+                  cells: [
+                    DataCell(
+                      Row(
+                        children: [
+                          Icon(FontAwesomeIcons.instagram,
+                              color: Colors.white,size: titleFontSize),
+                          const SizedBox(width: 10),
+                          Text(
+                            'SoiSiam',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: titleFontSize,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                DataRow(
+                  cells: [
+                    DataCell(
+                      Row(
+                        children: [
+                          Icon(FontAwesomeIcons.youtube,
+                              color: Colors.white,
+                              size: titleFontSize),
+                          const SizedBox(width: 10),
+                          Text(
+                            'SoiSiam Channel',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: titleFontSize,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                DataRow(
+                  cells: [
+                    DataCell(
+                      Row(
+                        children: [
+                          Icon(Icons.email, color: Colors.white, size: titleFontSize),
+                          const SizedBox(width: 10),
+                          Text(
+                            'SoiSiam@gmail.co.th',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: titleFontSize,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
         ),
       ],
     );
-  }
-
-  static List<Widget> _buildContactButtons({
-    double buttonFontSize = 14,
-    EdgeInsetsGeometry buttonPadding = const EdgeInsets.fromLTRB(5, 5, 5, 5),
-  }) {
-    return [
-      DataTable(
-        columns: const [
-          DataColumn(
-            label: Text(
-              ' ',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-        rows: const [
-          DataRow(
-            cells: [
-              DataCell(
-                Row(
-                  children: [
-                    Icon(Icons.phone, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text('090-890-xxxx', style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          DataRow(
-            cells: [
-              DataCell(
-                Row(
-                  children: [
-                    Icon(FontAwesomeIcons.instagram, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text('SoiSiam', style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          DataRow(
-            cells: [
-              DataCell(
-                Row(
-                  children: [
-                    Icon(FontAwesomeIcons.youtube, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text('SoiSiam Channel',
-                        style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          DataRow(
-            cells: [
-              DataCell(
-                Row(
-                  children: [
-                    Icon(Icons.email, color: Colors.white),
-                    SizedBox(width: 10),
-                    Text('SoiSiam@gmail.co.th',
-                        style: TextStyle(color: Colors.white)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ];
   }
 }
