@@ -235,7 +235,7 @@ class _CategoryFoodState extends State<CategoryFood> {
                       return GestureDetector(
                         onTap: () {
                           if (!isSelected) {
-                            print('เลือกหมวดหมู่:${category.foodCatId}');
+                            // print('เลือกหมวดหมู่:${category.foodCatId}');
                             _isManualSelection = true;
                             context
                                 .read<VisibleCategoryBloc>()

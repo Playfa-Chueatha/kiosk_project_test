@@ -76,8 +76,6 @@ class VisibleCategoryBloc
 
     on<MouseScrollCategoryChanged>((event, emit) {
       if (state.locked) {
-        print('[Bloc] Skip MouseScrollCategoryChanged because locked'
-            '--------------------------------------------------------------');
         return;
       }
       if (state.userSelectedCategory) {
